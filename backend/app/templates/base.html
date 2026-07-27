@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html class="design-{{ design_key }}">
+<head>
+    <meta charset="UTF-8">
+    <title>견적서 {{ quote.quote_number }}</title>
+    <style>
+        {{ base_css }}
+        {{ design_css }}
+        @page {
+            size: A4;
+            margin: 20mm 15mm 25mm 15mm;
+            @bottom-center {
+                content: "{{ watermark_text }}";
+                font-size: 8pt;
+                color: #ccc;
+                font-family: "Noto Sans KR", "DejaVu Sans", sans-serif;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quote-container">
+        {{ header }}
+        {{ info_blocks }}
+        {{ items_table }}
+        {{ summary }}
+        {{ footer }}
+    </div>
+</body>
+</html>

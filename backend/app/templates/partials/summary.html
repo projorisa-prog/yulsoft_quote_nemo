@@ -1,0 +1,31 @@
+<div class="summary-section">
+    <table class="summary-table">
+        <tr>
+            <th>공급가액 합계</th>
+            <td class="text-right">{{ totals.subtotal | format_number }} 원</td>
+        </tr>
+        {% if totals.discount_amount > 0 %}
+        <tr class="discount-row">
+            <th>할인금액 ({{ quote.calculation_snapshot.discount_type }}{% if quote.calculation_snapshot.discount_type == 'PERCENT' %}{{ quote.calculation_snapshot.discount_value }}%{% else %}{{ quote.calculation_snapshot.discount_value | format_number }}원{% endif %})</th>
+            <td class="text-right">- {{ totals.discount_amount | format_number }} 원</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <th>과세표준</th>
+            <td class="text-right">{{ totals.taxable_amount | format_number }} 원</td>
+        </tr>
+        <tr>
+            <th>부가세 ({{ (quote.calculation_snapshot.vat_rate * 100) | int }}%)</th>
+            <td class="text-right">{{ totals.vat_amount | format_number }} 원</td>
+        </tr>
+        <tr class="total-row">
+            <th>합계 금액</th>
+            <td class="text-right total-amount">{{ totals.grand_total | format_number }} 원</td>
+        </tr>
+    </table>
+    {% if quote.calculation_snapshot.vat_included %}
+    <p class="vat-note">* 위 금액은 부가세가 포함된 금액입니다.</p>
+    {% else %}
+    <p class="vat-note">* 위 금액은 부가세 별도 금액입니다.</p>
+    {% endif %}
+</div>

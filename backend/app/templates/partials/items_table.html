@@ -1,0 +1,30 @@
+<table class="items-table">
+    <thead>
+        <tr>
+            <th class="col-no">No.</th>
+            <th class="col-area">청소구역</th>
+            <th class="col-task">청소내용</th>
+            <th class="col-days">작업요일</th>
+            <th class="col-qty">수량/횟수</th>
+            <th class="col-price">단가(원)</th>
+            <th class="col-total">금액(원)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.sort_order }}</td>
+            <td>{{ item.area }}</td>
+            <td>
+                {{ item.task }}
+                {% if item.exclude_area %}<br><small class="exclude">(제외: {{ item.exclude_area }})</small>{% endif %}
+                {% if item.memo %}<br><small class="memo">{{ item.memo }}</small>{% endif %}
+            </td>
+            <td>{{ item.days | join(', ') }}</td>
+            <td>{{ item.qty }}</td>
+            <td class="text-right">{{ item.unit_price | format_number }}</td>
+            <td class="text-right">{{ item.total_price | format_number }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

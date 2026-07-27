@@ -1,0 +1,56 @@
+# Dependencies
+backend/.venv/
+backend/venv/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Environment files
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+backend/dist/
+backend/build/
+frontend/dist/
+frontend/build/
+
+# Database
+*.sqlite
+*.db
+
+# Docker
+.docker/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Test
+backend/.coverage
+backend/coverage.xml
+
+# Misc
+*.bak
+*.tmp

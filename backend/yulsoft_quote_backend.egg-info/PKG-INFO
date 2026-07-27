@@ -1,0 +1,35 @@
+Metadata-Version: 2.4
+Name: yulsoft-quote-backend
+Version: 0.1.0
+Summary: 율소프트 견적서 MVP 백엔드
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi==0.110.1
+Requires-Dist: uvicorn[standard]==0.29.0
+Requires-Dist: sqlalchemy==2.0.30
+Requires-Dist: alembic==1.13.1
+Requires-Dist: asyncpg==0.29.0
+Requires-Dist: pydantic==2.7.1
+Requires-Dist: pydantic-settings==2.3.2
+Requires-Dist: pydantic-extra-types==2.7.0
+Requires-Dist: python-multipart==0.0.9
+Requires-Dist: python-jose[cryptography]==3.3.0
+Requires-Dist: passlib[bcrypt]==1.7.4
+Requires-Dist: python-jose==3.3.0
+Requires-Dist: email-validator==2.1.0.post1
+Requires-Dist: weasyprint==62.0
+Requires-Dist: jinja2==3.1.4
+Requires-Dist: python-multipart==0.0.9
+Requires-Dist: httpx==0.27.0
+Requires-Dist: tenacity==8.2.3
+Requires-Dist: structlog==24.1.0
+Requires-Dist: python-json-logger==2.0.7
+Requires-Dist: prometheus-client==0.19.0
+Provides-Extra: dev
+Requires-Dist: pytest==8.2.0; extra == "dev"
+Requires-Dist: pytest-asyncio==0.23.3; extra == "dev"
+Requires-Dist: pytest-cov==5.0.0; extra == "dev"
+Requires-Dist: httpx==0.27.0; extra == "dev"
+Requires-Dist: ruff==0.4.4; extra == "dev"
+Requires-Dist: mypy==1.10.0; extra == "dev"
+Requires-Dist: pre-commit==3.7.0; extra == "dev"

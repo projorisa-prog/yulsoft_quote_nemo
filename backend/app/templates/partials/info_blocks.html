@@ -1,0 +1,17 @@
+<div class="info-blocks">
+    <div class="info-block customer-block">
+        <h3>고객/현장 정보</h3>
+        <table class="info-table">
+            <tr><th>성함</th><td>{{ customer.name }}</td></tr>
+            <tr><th>연락처</th><td>{{ customer.phone }}</td></tr>
+            {% if customer.email %}<tr><th>이메일</th><td>{{ customer.email }}</td></tr>{% endif %}
+            <tr><th>주소</th><td>{{ customer.address }} {% if customer.detail_address %}{{ customer.detail_address }}{% endif %}</td></tr>
+            <tr><th>건물유형</th><td>{{ customer.building_type }}</td></tr>
+            {% if customer.area_pyeong %}<tr><th>평수</th><td>{{ customer.area_pyeong }}평</td></tr>{% endif %}
+        </table>
+    </div>
+    <div class="info-block validity-block">
+        <h3>견적 유효기간</h3>
+        <div class="validity-date">{{ quote.expires_at.strftime('%Y년 %m월 %d일') }}까지</div>
+    </div>
+</div>

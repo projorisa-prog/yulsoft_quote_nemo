@@ -1,0 +1,20 @@
+<header class="quote-header">
+    <div class="header-top">
+        <div class="supplier-info">
+            <h1 class="company-name">{{ supplier.company_name }}</h1>
+            <div class="supplier-details">
+                <span>대표: {{ supplier.ceo_name }}</span>
+                <span>사업자등록번호: {{ supplier.biz_reg_no }}</span>
+                <span>주소: {{ supplier.address }}</span>
+                <span>업태: {{ supplier.business_type }} / 종목: {{ supplier.business_item }}</span>
+                <span>Tel: {{ supplier.phone }} | Email: {{ supplier.email }}</span>
+            </div>
+        </div>
+        <div class="quote-meta">
+            <h2>견적서</h2>
+            <div class="quote-number">No. {{ quote.quote_number }}</div>
+            <div class="quote-date">작성일: {{ quote.created_at.strftime('%Y-%m-%d') }}</div>
+        </div>
+    </div>
+    <div class="header-line"></div>
+</header>
