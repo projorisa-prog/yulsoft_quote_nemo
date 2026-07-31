@@ -6,7 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,15 @@ def parse_cors_origins(v: str | List[str]) -> List[str]:
                 pass
         return [origin.strip() for origin in v.split(',') if origin.strip()]
     return []
+
+
+def convert_to_async_url(url: str) -> str:
+    """Convert sync PostgreSQL URL to async (asyncpg) URL."""
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if url.startswith("postgresql+psycopg2://"):
+        return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+    return url
 
 
 class Settings(BaseSettings):
@@ -42,6 +51,13 @@ class Settings(BaseSettings):
         default="postgresql://postgres:***@localhost:5432/quote_nemo",
         alias="DATABASE_URL_SYNC",
     )
+
+    # Async database URL (computed property)
+    @property
+    def async_database_url(self) -> str:
+        """Get async database URL, converting from sync if needed."""
+        # Use the raw database_url env var, ensuring it's async
+        return convert_to_async_url(self.database_url)
 
     # App
     app_name: str = Field(default="율소프트 견적서", alias="APP_NAME")
