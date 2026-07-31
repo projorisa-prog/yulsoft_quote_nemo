@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuoteStore } from '@/store/quoteStore';
-import { api } from '@/lib/api';
 import { BuildingType } from '@/types/quote';
+import { KakaoPostcode } from '@/components/KakaoPostcode';
 
 const BUILDING_TYPES: { value: BuildingType; label: string }[] = [
   { value: 'APT', label: '아파트' },
@@ -18,7 +18,6 @@ const BUILDING_TYPES: { value: BuildingType; label: string }[] = [
 export default function CustomerInfoStep() {
   const { quoteData, updateCustomer } = useQuoteStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -40,9 +39,26 @@ export default function CustomerInfoStep() {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
   };
 
-  const handleAddressSearch = () => {
-    // TODO: Daum Postcode API 연동
-    alert('다음 주소 API 연동 필요 (NEXT_PUBLIC_DAUM_POSTCODE_KEY 설정 필요)');
+  const handleAddressComplete = (data: {
+    zonecode: string;
+    address: string;
+    roadAddress: string;
+    jibunAddress: string;
+    buildingName: string;
+  }) => {
+    // 도로명 주소 우선, 없으면 지번 주소
+    const fullAddress = data.roadAddress || data.jibunAddress;
+    updateCustomer({ 
+      address: fullAddress,
+      zipcode: data.zonecode,
+    });
+    
+    // 건물명이 있으면 상세주소에 자동 입력
+    if (data.buildingName) {
+      updateCustomer({ 
+        detail_address: data.buildingName,
+      });
+    }
   };
 
   return (
@@ -122,14 +138,24 @@ export default function CustomerInfoStep() {
             placeholder="도로명 주소"
             readOnly
           />
-          <button
-            type="button"
-            onClick={handleAddressSearch}
+          <KakaoPostcode
+            onComplete={(data) => {
+              const fullAddress = data.roadAddress || data.jibunAddress;
+              updateCustomer({ 
+                address: fullAddress,
+                zipcode: data.zonecode,
+              });
+              
+              // 건물명이 있으면 상세주소에 자동 입력
+              if (data.buildingName) {
+                updateCustomer({ 
+                  detail_address: data.buildingName,
+                });
+              }
+            }}
+            buttonText="주소 찾기"
             className="btn-secondary whitespace-nowrap"
-            disabled={isSearchingAddress}
-          >
-            주소 찾기
-          </button>
+          />
         </div>
         {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
       </div>

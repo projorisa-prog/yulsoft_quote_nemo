@@ -12,6 +12,7 @@ export interface CustomerInfo {
   phone: string;
   email: string;
   address: string;
+  zipcode: string;
   detail_address: string;
   building_type: BuildingType;
   area_pyeong: string;
