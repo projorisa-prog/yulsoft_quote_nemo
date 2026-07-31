@@ -103,6 +103,7 @@ export interface QuoteViewResponse {
   expires_at: string;
   created_at: string;
   updated_at: string;
+  calculation_snapshot: CalculationRequest;
 }
 
 export interface ErrorDetail {
