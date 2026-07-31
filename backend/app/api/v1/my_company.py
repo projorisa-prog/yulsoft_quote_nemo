@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Annotated
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -9,6 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, get_db
 from app.models.company_info import CompanyInfo
 from app.models.user import User, UserPlan
+
+if TYPE_CHECKING:
+    pass
 
 router = APIRouter()
 

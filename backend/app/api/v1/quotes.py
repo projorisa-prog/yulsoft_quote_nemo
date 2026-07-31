@@ -9,7 +9,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db, rate_limit_preview, rate_limit_create, rate_limit_view, rate_limit_pdf
 from app.models.quote import Quote, QuoteStatus
@@ -29,7 +28,7 @@ from app.services.calculation import calculation_service
 from app.services.pdf import pdf_service
 
 if TYPE_CHECKING:
-    pass
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 

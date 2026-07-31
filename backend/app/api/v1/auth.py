@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -9,15 +9,16 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
 from app.core.config import settings
 from app.models.user import User, UserPlan
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
-
 router = APIRouter()
 
 
@@ -91,7 +92,7 @@ def decode_token(token: str) -> dict:
 
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ) -> User:
     payload = decode_token(credentials.credentials)
     user_id = payload.get("sub")
@@ -100,7 +101,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    
+
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if user is None:
@@ -112,7 +113,7 @@ async def get_current_user(
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(request: RegisterRequest, db: Annotated[AsyncSession, Depends(get_db)]):
+async def register(request: RegisterRequest, db: Annotated["AsyncSession", Depends(get_db)]):
     # Check if email already exists
     result = await db.execute(select(User).where(User.email == request.email))
     if result.scalar_one_or_none():
@@ -120,7 +121,7 @@ async def register(request: RegisterRequest, db: Annotated[AsyncSession, Depends
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered",
         )
-    
+
     # Check if biz_reg_no already exists
     result = await db.execute(select(User).where(User.biz_reg_no == request.biz_reg_no))
     if result.scalar_one_or_none():
@@ -128,7 +129,7 @@ async def register(request: RegisterRequest, db: Annotated[AsyncSession, Depends
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Business registration number already registered",
         )
-    
+
     user = User(
         email=request.email,
         password_hash=get_password_hash(request.password),
@@ -139,14 +140,14 @@ async def register(request: RegisterRequest, db: Annotated[AsyncSession, Depends
         phone=request.phone,
         plan=UserPlan.FREE,
     )
-    
+
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    
+
     access_token = create_access_token({"sub": str(user.id), "email": user.email})
     refresh_token = create_refresh_token({"sub": str(user.id)})
-    
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -160,25 +161,25 @@ async def register(request: RegisterRequest, db: Annotated[AsyncSession, Depends
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(request: LoginRequest, db: Annotated[AsyncSession, Depends(get_db)]):
+async def login(request: LoginRequest, db: Annotated["AsyncSession", Depends(get_db)]):
     result = await db.execute(select(User).where(User.email == request.email))
     user = result.scalar_one_or_none()
-    
+
     if not user or not verify_password(request.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account is deactivated",
         )
-    
+
     access_token = create_access_token({"sub": str(user.id), "email": user.email})
     refresh_token = create_refresh_token({"sub": str(user.id)})
-    
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -194,23 +195,23 @@ async def login(request: LoginRequest, db: Annotated[AsyncSession, Depends(get_d
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     payload = decode_token(credentials.credentials)
-    
+
     if payload.get("type") != "refresh":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token type",
         )
-    
+
     user_id = payload.get("sub")
     if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    
+
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if user is None:
@@ -218,10 +219,10 @@ async def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
-    
+
     access_token = create_access_token({"sub": str(user.id), "email": user.email})
     refresh_token = create_refresh_token({"sub": str(user.id)})
-    
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
