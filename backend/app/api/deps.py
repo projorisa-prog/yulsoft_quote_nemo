@@ -1,33 +1,29 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Annotated, AsyncGenerator
+from typing import Annotated, AsyncGenerator
 from functools import lru_cache
 
-from fastapi import HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, JWTError
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import decode_token
 from app.db.session import async_session_maker
 from app.models.user import User
 
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-    from fastapi import Depends
-    from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-security: "HTTPBearer" = HTTPBearer()
+security = HTTPBearer()
 
 # In-memory rate limiting storage (use Redis in production)
 _rate_limit_store: dict[str, list[float]] = {}
 
 
 async def get_current_user(
-    credentials: Annotated["HTTPAuthorizationCredentials", "Depends(security)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     token = credentials.credentials
     try:
@@ -99,7 +95,7 @@ rate_limit_auth = get_rate_limit(5, 60)          # 5 req/min for auth endpoints
 
 
 # Re-export get_db from db.session
-async def get_db() -> AsyncGenerator["AsyncSession", None]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency for getting DB session."""
     async with async_session_maker() as session:
         try:

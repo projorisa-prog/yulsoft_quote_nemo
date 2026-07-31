@@ -1,26 +1,23 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models.template import Template
 from app.models.user import User, UserPlan
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-    from fastapi import Depends
 
 router = APIRouter()
 
 
 @router.get("", response_model=dict)
 async def get_my_templates(
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
 ):
@@ -67,8 +64,8 @@ async def get_my_templates(
 @router.post("", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_template(
     request: dict,
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     # Check plan
     if current_user.plan == UserPlan.FREE:
@@ -116,8 +113,8 @@ async def create_template(
 @router.post("/{template_id}/use", response_model=dict)
 async def use_template(
     template_id: str,
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     if current_user.plan == UserPlan.FREE:
         raise HTTPException(
@@ -156,8 +153,8 @@ async def use_template(
 async def update_template(
     template_id: str,
     request: dict,
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     if current_user.plan == UserPlan.FREE:
         raise HTTPException(
@@ -200,8 +197,8 @@ async def update_template(
 @router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_template(
     template_id: str,
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     if current_user.plan == UserPlan.FREE:
         raise HTTPException(

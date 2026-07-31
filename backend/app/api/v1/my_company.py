@@ -1,26 +1,23 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models.company_info import CompanyInfo
 from app.models.user import User, UserPlan
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
-    from fastapi import Depends
 
 router = APIRouter()
 
 
 @router.get("", response_model=dict)
 async def get_my_company_info(
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     result = await db.execute(
         select(CompanyInfo).where(CompanyInfo.user_id == current_user.id)
@@ -65,8 +62,8 @@ async def get_my_company_info(
 @router.patch("", response_model=dict)
 async def update_my_company_info(
     request: dict,
-    current_user: Annotated[User, "Depends(get_current_user)"],
-    db: Annotated["AsyncSession", "Depends(get_db)"],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ):
     result = await db.execute(
         select(CompanyInfo).where(CompanyInfo.user_id == current_user.id)
