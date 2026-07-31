@@ -39,7 +39,6 @@ export default function RegisterPage() {
     if (!formData.road) newErrors.road = '도로명 주소를 입력해주세요.';
     if (!formData.phone) newErrors.phone = '연락처를 입력해주세요.';
     else if (!/^01[0-9]-?\d{4}-?\d{4}$/.test(formData.phone.replace(/-/g, ''))) newErrors.phone = '올바른 휴대폰 번호 형식이 아닙니다.';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -62,11 +61,7 @@ export default function RegisterPage() {
         company_name: formData.company_name,
         ceo_name: formData.ceo_name,
         biz_reg_no: formData.biz_reg_no.replace(/-/g, ''),
-        company_address: {
-          zipcode: formData.zipcode,
-          road: formData.road,
-          detail: formData.detail,
-        },
+        company_address: { zipcode: formData.zipcode, road: formData.road, detail: formData.detail },
         phone: formData.phone.replace(/-/g, ''),
       };
 
@@ -92,217 +87,189 @@ export default function RegisterPage() {
   };
 
   const handleAddressSearch = () => {
-    // TODO: Daum Postcode API 연동
     alert('다음 주소 API 연동 필요 (NEXT_PUBLIC_DAUM_POSTCODE_KEY 설정 필요)');
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8">
-        <div>
-          <Link href="/" className="text-xl font-bold text-primary-900">
-            율소프트 견적서
-          </Link>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            회원가입
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            이미 계정이 있으신가요?{' '}
-            <Link href="/auth/login" className="font-medium text-primary-600 hover:text-primary-500">
-              로그인
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <p className="text-red-500 text-xs mt-1">{errors[field]}</p> : null;
 
+  return (
+    <div className="min-h-screen bg-[#f0f4ff] flex flex-col items-center justify-center py-12 px-4">
+      {/* Logo */}
+      <Link href="/" className="flex items-center gap-2 mb-8">
+        <div className="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center">
+          <svg className="w-5 h-5 text-white" viewBox="0 0 16 16" fill="none">
+            <path d="M2 5h12M2 8h9M2 11h6" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <span className="text-xl font-bold text-gray-900">율소프트</span>
+      </Link>
+
+      {/* Card */}
+      <div className="w-full max-w-2xl bg-white rounded-2xl border border-blue-100 shadow-card p-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">회원가입</h1>
+        <p className="text-sm text-gray-500 mb-7">
+          이미 계정이 있으신가요?{' '}
+          <Link href="/auth/login" className="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+            로그인
+          </Link>
+        </p>
+
+        {error && (
+          <div className="mb-5 flex items-start gap-2 p-3.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* 계정 정보 */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">이메일/비밀번호</h3>
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">
+              이메일 / 비밀번호
+            </h2>
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="label">이메일</label>
+                <label htmlFor="reg-email" className="label">이메일 <span className="text-red-500">*</span></label>
                 <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  className={`input ${errors.email ? 'input-error' : ''}`}
-                  placeholder="user@example.com"
+                  id="reg-email" type="email" autoComplete="email" required
+                  value={formData.email} onChange={(e) => handleChange('email', e.target.value)}
+                  className={`input ${errors.email ? 'input-error' : ''}`} placeholder="user@example.com"
                 />
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                <FieldError field="email" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="password" className="label">비밀번호</label>
+                  <label htmlFor="reg-password" className="label">비밀번호 <span className="text-red-500">*</span></label>
                   <input
-                    id="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    minLength={8}
-                    value={formData.password}
-                    onChange={(e) => handleChange('password', e.target.value)}
-                    className={`input ${errors.password ? 'input-error' : ''}`}
-                    placeholder="8자 이상"
+                    id="reg-password" type="password" autoComplete="new-password" required minLength={8}
+                    value={formData.password} onChange={(e) => handleChange('password', e.target.value)}
+                    className={`input ${errors.password ? 'input-error' : ''}`} placeholder="8자 이상"
                   />
-                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                  <FieldError field="password" />
                 </div>
                 <div>
-                  <label htmlFor="confirmPassword" className="label">비밀번호 확인</label>
+                  <label htmlFor="reg-confirm-password" className="label">비밀번호 확인 <span className="text-red-500">*</span></label>
                   <input
-                    id="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                    className={`input ${errors.confirmPassword ? 'input-error' : ''}`}
-                    placeholder="비밀번호 재입력"
+                    id="reg-confirm-password" type="password" autoComplete="new-password" required
+                    value={formData.confirmPassword} onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                    className={`input ${errors.confirmPassword ? 'input-error' : ''}`} placeholder="비밀번호 재입력"
                   />
-                  {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+                  <FieldError field="confirmPassword" />
                 </div>
               </div>
             </div>
           </div>
 
+          {/* 회사 정보 */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">회사 정보</h3>
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100">
+              회사 정보
+            </h2>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="company_name" className="label">회사명 <span className="text-red-500">*</span></label>
-                <input
-                  id="company_name"
-                  type="text"
-                  required
-                  value={formData.company_name}
-                  onChange={(e) => handleChange('company_name', e.target.value)}
-                  className={`input ${errors.company_name ? 'input-error' : ''}`}
-                  placeholder="율소프트 청소"
-                />
-                {errors.company_name && <p className="text-red-500 text-sm mt-1">{errors.company_name}</p>}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="reg-company-name" className="label">회사명 <span className="text-red-500">*</span></label>
+                  <input
+                    id="reg-company-name" type="text" required
+                    value={formData.company_name} onChange={(e) => handleChange('company_name', e.target.value)}
+                    className={`input ${errors.company_name ? 'input-error' : ''}`} placeholder="율소프트 청소"
+                  />
+                  <FieldError field="company_name" />
+                </div>
+                <div>
+                  <label htmlFor="reg-ceo-name" className="label">대표자명 <span className="text-red-500">*</span></label>
+                  <input
+                    id="reg-ceo-name" type="text" required
+                    value={formData.ceo_name} onChange={(e) => handleChange('ceo_name', e.target.value)}
+                    className={`input ${errors.ceo_name ? 'input-error' : ''}`} placeholder="홍길동"
+                  />
+                  <FieldError field="ceo_name" />
+                </div>
               </div>
               <div>
-                <label htmlFor="ceo_name" className="label">대표자명 <span className="text-red-500">*</span></label>
+                <label htmlFor="reg-biz-reg-no" className="label">사업자등록번호 <span className="text-red-500">*</span></label>
                 <input
-                  id="ceo_name"
-                  type="text"
-                  required
-                  value={formData.ceo_name}
-                  onChange={(e) => handleChange('ceo_name', e.target.value)}
-                  className={`input ${errors.ceo_name ? 'input-error' : ''}`}
-                  placeholder="홍길동"
-                />
-                {errors.ceo_name && <p className="text-red-500 text-sm mt-1">{errors.ceo_name}</p>}
-              </div>
-              <div>
-                <label htmlFor="biz_reg_no" className="label">사업자등록번호 <span className="text-red-500">*</span></label>
-                <input
-                  id="biz_reg_no"
-                  type="text"
-                  required
-                  maxLength={12}
+                  id="reg-biz-reg-no" type="text" required maxLength={12}
                   value={formData.biz_reg_no}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    const formatted = value.length > 3 && value.length <= 5 
-                      ? `${value.slice(0, 3)}-${value.slice(3)}`
-                      : value.length > 5
-                      ? `${value.slice(0, 3)}-${value.slice(3, 5)}-${value.slice(5)}`
-                      : value;
-                    handleChange('biz_reg_no', formatted);
+                    const v = e.target.value.replace(/[^0-9]/g, '');
+                    const f = v.length > 5 ? `${v.slice(0,3)}-${v.slice(3,5)}-${v.slice(5)}` : v.length > 3 ? `${v.slice(0,3)}-${v.slice(3)}` : v;
+                    handleChange('biz_reg_no', f);
                   }}
-                  className={`input ${errors.biz_reg_no ? 'input-error' : ''}`}
-                  placeholder="123-45-67890"
+                  className={`input ${errors.biz_reg_no ? 'input-error' : ''}`} placeholder="123-45-67890"
                 />
-                {errors.biz_reg_no && <p className="text-red-500 text-sm mt-1">{errors.biz_reg_no}</p>}
+                <FieldError field="biz_reg_no" />
               </div>
+
+              {/* 주소 */}
               <div>
-                <label htmlFor="zipcode" className="label">우편번호 <span className="text-red-500">*</span></label>
+                <label htmlFor="reg-zipcode" className="label">우편번호 <span className="text-red-500">*</span></label>
                 <div className="flex gap-2">
                   <input
-                    id="zipcode"
-                    type="text"
-                    required
-                    readOnly
+                    id="reg-zipcode" type="text" readOnly
                     value={formData.zipcode}
-                    className={`input ${errors.zipcode ? 'input-error' : ''}`}
-                    placeholder="우편번호"
+                    className={`input ${errors.zipcode ? 'input-error' : ''}`} placeholder="우편번호"
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddressSearch}
-                    className="btn-secondary whitespace-nowrap"
-                  >
+                  <button type="button" onClick={handleAddressSearch} className="btn-secondary whitespace-nowrap">
                     주소 찾기
                   </button>
                 </div>
-                {errors.zipcode && <p className="text-red-500 text-sm mt-1">{errors.zipcode}</p>}
+                <FieldError field="zipcode" />
               </div>
               <div>
-                <label htmlFor="road" className="label">도로명 주소 <span className="text-red-500">*</span></label>
+                <label htmlFor="reg-road" className="label">도로명 주소 <span className="text-red-500">*</span></label>
                 <input
-                  id="road"
-                  type="text"
-                  required
-                  readOnly
-                  value={formData.road}
-                  className={`input ${errors.road ? 'input-error' : ''}`}
-                  placeholder="도로명 주소"
+                  id="reg-road" type="text" readOnly value={formData.road}
+                  className={`input ${errors.road ? 'input-error' : ''}`} placeholder="도로명 주소"
                 />
-                {errors.road && <p className="text-red-500 text-sm mt-1">{errors.road}</p>}
+                <FieldError field="road" />
               </div>
               <div>
-                <label htmlFor="detail" className="label">상세 주소</label>
+                <label htmlFor="reg-detail" className="label">상세 주소</label>
                 <input
-                  id="detail"
-                  type="text"
-                  value={formData.detail}
+                  id="reg-detail" type="text" value={formData.detail}
                   onChange={(e) => handleChange('detail', e.target.value)}
-                  className="input"
-                  placeholder="동/호수, 건물명 등"
+                  className="input" placeholder="동/호수, 건물명 등"
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="label">연락처 <span className="text-red-500">*</span></label>
+                <label htmlFor="reg-phone" className="label">연락처 <span className="text-red-500">*</span></label>
                 <input
-                  id="phone"
-                  type="tel"
-                  required
-                  maxLength={13}
+                  id="reg-phone" type="tel" required maxLength={13}
                   value={formData.phone}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    let formatted = value;
-                    if (value.length > 3 && value.length <= 7) {
-                      formatted = `${value.slice(0, 3)}-${value.slice(3)}`;
-                    } else if (value.length > 7) {
-                      formatted = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
-                    }
-                    handleChange('phone', formatted);
+                    const v = e.target.value.replace(/[^0-9]/g, '');
+                    let f = v;
+                    if (v.length > 7) f = `${v.slice(0,3)}-${v.slice(3,7)}-${v.slice(7)}`;
+                    else if (v.length > 3) f = `${v.slice(0,3)}-${v.slice(3)}`;
+                    handleChange('phone', f);
                   }}
-                  className={`input ${errors.phone ? 'input-error' : ''}`}
-                  placeholder="010-1234-5678"
+                  className={`input ${errors.phone ? 'input-error' : ''}`} placeholder="010-1234-5678"
                 />
-                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                <FieldError field="phone" />
               </div>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-4 text-lg"
-            >
-              {loading ? '가입 중...' : '가입하기'}
-            </button>
-          </div>
+          <button
+            id="register-submit"
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full py-3 text-base"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                </svg>
+                가입 중...
+              </span>
+            ) : '가입하기'}
+          </button>
         </form>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuoteStore } from '@/store/quoteStore';
+import { DashboardLayout } from '@/components/AppLayout';
 
 interface CompanyInfo {
   biz_reg_no: string;
@@ -128,44 +129,40 @@ export default function MyCompanyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f0f4ff] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">불러오는 중...</p>
+          <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-500">불러오는 중...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-3xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-primary-900">
-              율소프트 견적서
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">회사 정보 설정</h1>
-          <p className="text-gray-600 mt-1">
-            견적서에 자동으로 채워질 공급자 정보를 입력하세요.
-          </p>
-        </div>
+    <DashboardLayout title="회사 정보 설정" description="견적서에 자동으로 채워질 공급자 정보를 입력하세요.">
 
         {message && (
-          <div className={`rounded-lg p-4 mb-6 ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+          <div className={`flex items-center gap-2.5 p-4 mb-5 rounded-xl border text-sm ${
+            message.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : 'bg-red-50 border-red-200 text-red-600'
+          }`}>
+            {message.type === 'success' ? (
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
             {message.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} id="company-form" className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h2>
+        <form onSubmit={handleSubmit} id="company-form" className="space-y-5">
+          <div className="card p-5">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider pb-3 mb-4 border-b border-gray-100">기본 정보</h2>
             <div className="space-y-4">
               <div>
                 <label htmlFor="biz_reg_no" className="label">사업자등록번호 <span className="text-red-500">*</span></label>
@@ -286,9 +283,9 @@ export default function MyCompanyPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">계좌 정보 (선택)</h2>
-            <p className="text-sm text-gray-500 mb-4">견적서에 계좌 정보를 표시하려면 입력하세요.</p>
+          <div className="card p-5">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider pb-3 mb-2 border-b border-gray-100">계좌 정보 (선택)</h2>
+            <p className="text-xs text-gray-400 mb-4">견적서에 계좌 정보를 표시하려면 입력하세요.</p>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label htmlFor="bank_name" className="label">은행명</label>
@@ -327,23 +324,27 @@ export default function MyCompanyPage() {
           </div>
         </form>
 
-        <div className="mt-8 flex gap-4">
+        <div className="mt-5 flex gap-3">
           <button
             type="submit"
             form="company-form"
             disabled={saving}
-            className="btn-accent flex-1 py-3 text-lg"
+            className="btn-primary flex-1 py-2.5"
           >
-            {saving ? '저장 중...' : '저장하기'}
+            {saving ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+                </svg>
+                저장 중...
+              </span>
+            ) : '저장하기'}
           </button>
-          <Link
-            href="/dashboard"
-            className="btn-secondary flex-1 py-3 text-lg text-center"
-          >
+          <Link href="/dashboard" className="btn-secondary flex-1 py-2.5 text-center">
             취소
           </Link>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }
