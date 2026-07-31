@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models.quote import Quote, QuoteStatus
@@ -14,7 +13,7 @@ from app.models.user import User, UserPlan
 from pydantic import BaseModel, ConfigDict
 
 if TYPE_CHECKING:
-    pass
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -80,7 +79,7 @@ router = APIRouter()
 @router.get("", response_model=QuoteListResponse)
 async def list_my_quotes(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     status: Optional[str] = Query(None),
@@ -146,7 +145,7 @@ async def list_my_quotes(
 async def get_my_quote(
     quote_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     result = await db.execute(
         select(Quote).where(Quote.id == quote_id, Quote.user_id == current_user.id)
@@ -201,7 +200,7 @@ async def update_my_quote(
     quote_id: str,
     request: QuotePatchRequest,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     result = await db.execute(
         select(Quote).where(Quote.id == quote_id, Quote.user_id == current_user.id)
@@ -246,7 +245,7 @@ async def update_my_quote(
 async def convert_to_contract(
     quote_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     if current_user.plan == UserPlan.FREE:
         raise HTTPException(

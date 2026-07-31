@@ -5,14 +5,13 @@ from typing import TYPE_CHECKING, Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models.company_info import CompanyInfo
 from app.models.user import User, UserPlan
 
 if TYPE_CHECKING:
-    pass
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -20,13 +19,13 @@ router = APIRouter()
 @router.get("", response_model=dict)
 async def get_my_company_info(
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     result = await db.execute(
         select(CompanyInfo).where(CompanyInfo.user_id == current_user.id)
     )
     company_info = result.scalar_one_or_none()
-    
+
     if not company_info:
         # Return user's basic info as fallback
         return {
@@ -44,7 +43,7 @@ async def get_my_company_info(
                 "account_holder": "",
             },
         }
-    
+
     return {
         "biz_reg_no": company_info.biz_reg_no,
         "company_name": company_info.company_name,
@@ -66,13 +65,13 @@ async def get_my_company_info(
 async def update_my_company_info(
     request: dict,
     current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     result = await db.execute(
         select(CompanyInfo).where(CompanyInfo.user_id == current_user.id)
     )
     company_info = result.scalar_one_or_none()
-    
+
     if not company_info:
         # Create new company info
         company_info = CompanyInfo(
@@ -108,13 +107,13 @@ async def update_my_company_info(
             company_info.email = request["email"]
         if "bank_info" in request:
             company_info.bank_info = request["bank_info"]
-        
+
         company_info.updated_at = datetime.now(timezone.utc)
-    
+
     db.add(company_info)
     await db.commit()
     await db.refresh(company_info)
-    
+
     return {
         "biz_reg_no": company_info.biz_reg_no,
         "company_name": company_info.company_name,

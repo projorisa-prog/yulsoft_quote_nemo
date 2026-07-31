@@ -75,7 +75,7 @@ async def preview_quote(request: PreviewRequest):
 )
 async def create_quote(
     request: QuoteCreateRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: Annotated["AsyncSession", Depends(get_db)],
     http_request: Request,
     current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ):
@@ -172,8 +172,8 @@ async def create_quote(
 )
 async def get_quote(
     public_id: uuid.UUID,
+    db: Annotated["AsyncSession", Depends(get_db)],
     format: Annotated[str, Query(pattern="^(json|html)$")] = "json",
-    db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Quote).where(Quote.id == public_id))
     quote = result.scalar_one_or_none()
@@ -259,7 +259,7 @@ async def get_quote(
 )
 async def download_pdf(
     public_id: uuid.UUID,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated["AsyncSession", Depends(get_db)],
 ):
     result = await db.execute(select(Quote).where(Quote.id == public_id))
     quote = result.scalar_one_or_none()
