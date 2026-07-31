@@ -30,7 +30,6 @@ coverage.xml
 *.md
 !README.md
 tests/
-alembic/
 *.egg-info
 dist/
 build/
