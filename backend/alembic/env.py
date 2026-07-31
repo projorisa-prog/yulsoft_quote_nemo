@@ -26,7 +26,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
-    url = settings.database_url_sync
+    url = settings.async_database_url  # Use async URL for consistency
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -44,8 +44,13 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 async def run_async_migrations() -> None:
+    # Use settings.async_database_url instead of alembic.ini hardcoded value
+    # This ensures we use the DATABASE_URL environment variable (converted to asyncpg)
+    configuration = config.get_section(config.config_ini_section, {})
+    configuration["sqlalchemy.url"] = settings.async_database_url
+    
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
