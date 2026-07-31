@@ -1,24 +1,45 @@
 'use client';
 
+import { Suspense } from 'react';
+
+export default function CompletePageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">견적서 불러오는 중...</p>
+        </div>
+      </div>
+    }>
+      <CompletePageContent />
+    </Suspense>
+  );
+}
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { formatNumber, formatDate, calculateDaysUntil } from '@/lib/utils';
 import type { QuoteViewResponse } from '@/types/quote';
 
-export default function CompletePage() {
-  const params = useParams();
+function CompletePageContent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const quoteId = params.id as string;
+  const quoteId = searchParams?.get('id');
   const [quote, setQuote] = useState<QuoteViewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
+    if (!quoteId) {
+      router.push('/quote/create');
+      return;
+    }
     async function fetchQuote() {
       try {
-        const data = await api.getQuote(quoteId);
+        const data = await api.getQuote(quoteId!);
         setQuote(data);
       } catch (error) {
         console.error('견적서 조회 실패:', error);
@@ -52,7 +73,7 @@ export default function CompletePage() {
   };
 
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/q/${quoteId}`;
+    const url = `${window.location.origin}/q?id=${quoteId!}`;
     navigator.clipboard.writeText(url);
     alert('링크가 클립보드에 복사되었습니다.');
   };
@@ -145,7 +166,7 @@ export default function CompletePage() {
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-3 text-center">
-            공유 링크: <code className="bg-gray-100 px-2 py-1 rounded">{window.location.origin}/q/{quoteId}</code>
+            공유 링크: <code className="bg-gray-100 px-2 py-1 rounded">{window.location.origin}/q?id={quoteId}</code>
           </p>
         </div>
 
