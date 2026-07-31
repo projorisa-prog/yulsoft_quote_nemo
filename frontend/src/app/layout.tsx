@@ -4,6 +4,8 @@ export const metadata = {
   keywords: ['견적서', '청소견적', '무료견적서', 'PDF다운로드'],
 };
 
+import './globals.css';
+
 export default function RootLayout({
   children,
 }: {
