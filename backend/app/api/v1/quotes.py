@@ -3,9 +3,9 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from typing import Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -27,6 +27,9 @@ from app.schemas.quote import (
 )
 from app.services.calculation import calculation_service
 from app.services.pdf import pdf_service
+
+if TYPE_CHECKING:
+    pass
 
 router = APIRouter()
 
@@ -78,7 +81,7 @@ async def create_quote(
     current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ):
     totals = calculation_service.calculate_totals(request.calculation)
-    
+
     # Determine quote number format
     if current_user:
         # Member: YYMM-SEQ
@@ -87,13 +90,13 @@ async def create_quote(
     else:
         # Non-member: TEMP-UUID
         quote_number = f"TEMP-{uuid.uuid4().hex[:8].upper()}"
-    
+
     # Determine watermark text
     if current_user and current_user.plan != UserPlan.FREE:
         watermark_text = ""
     else:
         watermark_text = "Powered by 율소프트 | www.yulsoft.kr"
-    
+
     # Use company info for supplier if available
     supplier_info = request.supplier.model_dump()
     if current_user and current_user.plan != UserPlan.FREE:
@@ -113,7 +116,7 @@ async def create_quote(
                 "phone": company_info.phone,
                 "email": company_info.email,
             }
-    
+
     quote = Quote(
         user_id=current_user.id if current_user else None,
         quote_number=quote_number,
@@ -170,8 +173,8 @@ async def create_quote(
 )
 async def get_quote(
     public_id: uuid.UUID,
-    format: Annotated[str, Query(pattern="^(json|html)$")] = "html",
-    db: Annotated[AsyncSession, Depends(get_db)] = None,
+    format: Annotated[str, Query(pattern="^(json|html)$")] = "json",
+    db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Quote).where(Quote.id == public_id))
     quote = result.scalar_one_or_none()
@@ -222,31 +225,31 @@ async def get_quote(
     from fastapi.responses import HTMLResponse
     from app.services.pdf import PDFService
     pdf_svc = PDFService()
-    html_content = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>견적서 {quote.quote_number}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        {pdf_svc._get_base_css()}
-        {pdf_svc._get_design_css(quote.design_key)}
-        body {{ padding: 20px; background: #f0f0f0; }}
-        .quote-container {{ max-width: 800px; margin: 0 auto; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 40px; }}
-    </style>
-</head>
-<body>
-    <div class="quote-container">
-        {pdf_svc._render_header(quote)}
-        {pdf_svc._render_info_blocks(quote)}
-        {pdf_svc._render_items_table(sorted(quote.items, key=lambda x: x.sort_order))}
-        {pdf_svc._render_summary(totals)}
-        {pdf_svc._render_footer(quote)}
-    </div>
-</body>
-</html>
-"""
+    html_content = (
+        "<!DOCTYPE html>\n"
+        "<html>\n"
+        "<head>\n"
+        "    <meta charset=\"UTF-8\">\n"
+        f"    <title>견적서 {quote.quote_number}</title>\n"
+        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+        "    <style>\n"
+        f"        {pdf_svc._get_base_css()}\n"
+        f"        {pdf_svc._get_design_css(quote.design_key)}\n"
+        "        body { padding: 20px; background: #f0f0f0; }\n"
+        "        .quote-container { max-width: 800px; margin: 0 auto; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 40px; }\n"
+        "    </style>\n"
+        "</head>\n"
+        "<body>\n"
+        "    <div class=\"quote-container\">\n"
+        f"        {pdf_svc._render_header(quote)}\n"
+        f"        {pdf_svc._render_info_blocks(quote)}\n"
+        f"        {pdf_svc._render_items_table(sorted(quote.items, key=lambda x: x.sort_order))}\n"
+        f"        {pdf_svc._render_summary(totals)}\n"
+        f"        {pdf_svc._render_footer(quote)}\n"
+        "    </div>\n"
+        "</body>\n"
+        "</html>"
+    )
     return HTMLResponse(content=html_content)
 
 
@@ -257,7 +260,7 @@ async def get_quote(
 )
 async def download_pdf(
     public_id: uuid.UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(select(Quote).where(Quote.id == public_id))
     quote = result.scalar_one_or_none()
