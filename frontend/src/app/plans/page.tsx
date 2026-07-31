@@ -137,8 +137,8 @@ export default function PlansPage() {
                   현재 플랜: <span className="text-primary-600">{currentPlan}</span>
                 </p>
                 <p className="text-sm text-gray-500">
-                  {currentPlan === 'FREE' 
-                    ? '워터마크 포함, 견적 저장 5개 제한' 
+                  {currentPlan === 'FREE'
+                    ? '워터마크 포함, 견적 저장 5개 제한'
                     : '모든 기능 이용 가능'}
                 </p>
               </div>
@@ -304,7 +304,7 @@ export default function PlansPage() {
                 </summary>
                 <p className="mt-3 text-gray-600">{faq.a}</p>
               </details>
-            )}
+            ))}
           </div>
         </div>
       </main>

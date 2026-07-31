@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useQuoteStore } from '@/store/quoteStore';
 
 interface CompanyInfo {
@@ -162,7 +163,7 @@ export default function MyCompanyPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} id="company-form" className="space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h2>
             <div className="space-y-4">
@@ -287,7 +288,7 @@ export default function MyCompanyPage() {
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">계좌 정보 (선택)</h2>
-            <p className="text-sm text-gray-500 mb-4">견적서에 계좌 정보를 표시하려면 입력하세요.</            </p>
+            <p className="text-sm text-gray-500 mb-4">견적서에 계좌 정보를 표시하려면 입력하세요.</p>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label htmlFor="bank_name" className="label">은행명</label>

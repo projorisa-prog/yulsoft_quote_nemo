@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { formatNumber, formatDateShort, UserPlan } from '@/lib/utils';
 import { useQuoteStore } from '@/store/quoteStore';
 
@@ -54,10 +55,6 @@ export default function MyTemplatesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchTemplates();
-  }, [accessToken, page]);
-
   const handleDelete = async (templateId: string) => {
     if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
     
@@ -76,16 +73,14 @@ export default function MyTemplatesPage() {
   };
 
   const handleUseTemplate = (template: any) => {
-    // Update quote store with template data
     const { setItems, updateCalculation, setCurrentStep, setTemplateId } = useQuoteStore.getState().actions;
     
     setItems(template.items);
     if (template.calculation_snapshot) {
-      // We need to get the store actions properly
       const store = useQuoteStore.getState();
       store.actions.updateCalculation(template.calculation_snapshot);
     }
-    useQuoteStore.getState().actions.setCurrentStep(2); // Go to items step
+    useQuoteStore.getState().actions.setCurrentStep(2);
     useQuoteStore.getState().actions.setTemplateId(template.id);
     
     router.push('/quote/create');
@@ -117,7 +112,7 @@ export default function MyTemplatesPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">템플릿 관리</h1>
-          <p className="text-gray-600 mt-1">자주 쓰는 견적 항목을 템플릿으로 저장하고 빠르게 불러오세요.</          </p>
+          <p className="text-gray-600 mt-1">자주 쓰는 견적 항목을 템플릿으로 저장하고 빠르게 불러오세요.</p>
         </div>
 
         {isFree && (
@@ -127,8 +122,8 @@ export default function MyTemplatesPage() {
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="font-medium text-yellow-800">템플릿 기능은 PRO 플랜 이상에서 이용 가능합니다.</                <p className="text-sm text-yellow-700 mt-1">무료 플랜에서는 템플릿을 저장하거나 사용할 수 없습니다.
-                </p>
+                <p className="font-medium text-yellow-800">템플릿 기능은 PRO 플랜 이상에서 이용 가능합니다.</p>
+                <p className="text-sm text-yellow-700 mt-1">무료 플랜에서는 템플릿을 저장하거나 사용할 수 없습니다.</p>
               </div>
             </div>
           </div>
@@ -153,8 +148,7 @@ export default function MyTemplatesPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
             <h3 className="text-lg font-medium text-gray-900 mb-2">저장된 템플릿이 없습니다</h3>
-            <p className="text-gray-500 mb-6">견적서 작성 시 템플릿으로 저장하면 여기서 관리할 수 있습니다.
-            </p>
+            <p className="text-gray-500 mb-6">견적서 작성 시 템플릿으로 저장하면 여기서 관리할 수 있습니다.</p>
             <Link href="/quote/create" className="btn-accent inline-block">
               첫 템플릿 만들기
             </Link>
@@ -236,9 +230,3 @@ export default function MyTemplatesPage() {
     </div>
   );
 }
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { formatDateShort } from '@/lib/utils';
-import { useQuoteStore } from '@/store/quoteStore';
