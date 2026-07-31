@@ -1,5 +1,4 @@
 from __future__ import annotations
-from __future__ import annotations
 
 import json
 import os
@@ -7,7 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,16 +54,15 @@ class Settings(BaseSettings):
     algorithm: str = Field(default="HS256", alias="ALGORITHM")
     access_token_expire_minutes: int = Field(default=30, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
 
-    # CORS
-    cors_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:3001", "https://yulsoft.kr"],
+    # CORS - store as string, parse via property
+    cors_origins_raw: str = Field(
+        default='["http://localhost:3000", "http://localhost:3001", "https://yulsoft.kr"]',
         alias="CORS_ORIGINS",
     )
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors(cls, v: str | List[str]) -> List[str]:
-        return parse_cors_origins(v)
+    @property
+    def cors_origins(self) -> List[str]:
+        return parse_cors_origins(self.cors_origins_raw)
 
     # Rate Limiting
     rate_limit_preview: int = Field(default=30, alias="RATE_LIMIT_PREVIEW")
