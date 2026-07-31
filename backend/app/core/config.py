@@ -1,11 +1,29 @@
 from __future__ import annotations
+from __future__ import annotations
 
+import json
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import List
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def parse_cors_origins(v: str | List[str]) -> List[str]:
+    """Parse CORS origins from JSON string or comma-separated string."""
+    if isinstance(v, list):
+        return v
+    if isinstance(v, str):
+        v = v.strip()
+        if v.startswith('['):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                pass
+        return [origin.strip() for origin in v.split(',') if origin.strip()]
+    return []
 
 
 class Settings(BaseSettings):
@@ -22,7 +40,7 @@ class Settings(BaseSettings):
         alias="DATABASE_URL",
     )
     database_url_sync: str = Field(
-        default="postgresql://postgres:postgres@localhost:5432/quote_nemo",
+        default="postgresql://postgres:***@localhost:5432/quote_nemo",
         alias="DATABASE_URL_SYNC",
     )
 
@@ -38,10 +56,15 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
 
     # CORS
-    cors_origins: list[str] = Field(
+    cors_origins: List[str] = Field(
         default=["http://localhost:3000", "http://localhost:3001", "https://yulsoft.kr"],
         alias="CORS_ORIGINS",
     )
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors(cls, v: str | List[str]) -> List[str]:
+        return parse_cors_origins(v)
 
     # Rate Limiting
     rate_limit_preview: int = Field(default=30, alias="RATE_LIMIT_PREVIEW")
