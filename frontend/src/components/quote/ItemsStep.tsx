@@ -9,7 +9,7 @@ const DAY_LABELS: Record<DaysOfWeek, string> = {
   MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금', SAT: '토', SUN: '일',
 };
 
-const PRESETS = [
+const PRESETS: { key: string; label: string; days: DaysOfWeek[] }[] = [
   { key: 'WEEKLY_1', label: '주 1회', days: ['MON'] },
   { key: 'WEEKLY_2', label: '주 2회', days: ['MON', 'THU'] },
   { key: 'WEEKLY_3', label: '주 3회', days: ['MON', 'WED', 'FRI'] },
