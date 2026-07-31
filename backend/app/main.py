@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging()
-    logger.info("Starting application", version=settings.app_version)
+    logger.info("Starting application")
     await create_db_and_tables()
     yield
     await engine.dispose()
