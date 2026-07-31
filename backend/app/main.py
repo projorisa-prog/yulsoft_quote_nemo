@@ -8,6 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
+from alembic.config import Config
+from alembic import command
+
 from app.api.router import api_router
 from app.core.config import settings
 from app.core.logging import get_logger, setup_logging
@@ -16,12 +19,32 @@ from app.db.session import create_db_and_tables, engine
 logger = get_logger(__name__)
 
 
+def run_migrations() -> None:
+    """Run alembic migrations synchronously."""
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", settings.database_url_sync)
+    command.upgrade(alembic_cfg, "head")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging()
     logger.info("Starting application")
+    
+    # Create tables
     await create_db_and_tables()
+    
+    # Run alembic migrations in thread pool to avoid blocking
+    try:
+        import asyncio
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, run_migrations)
+        logger.info("Alembic migrations completed")
+    except Exception as e:
+        logger.warning(f"Migration skipped/failed: {e}")
+    
     yield
+    
     await engine.dispose()
     logger.info("Shutting down application")
 
