@@ -26,7 +26,7 @@ export default function CreateQuotePage() {
     nextStep,
     prevStep,
     setCurrentStep,
-    actions: storeActions
+    submitQuote,
   } = useQuoteStore();
   const [submitted, setSubmitted] = useState(false);
 
@@ -50,7 +50,7 @@ export default function CreateQuotePage() {
     }
 
     try {
-      await storeActions.submitQuote();
+      await submitQuote();
       setSubmitted(true);
     } catch (error) {
       alert(error instanceof Error ? error.message : '견적서 생성에 실패했습니다.');

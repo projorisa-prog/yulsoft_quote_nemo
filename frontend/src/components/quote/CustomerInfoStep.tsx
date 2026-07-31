@@ -16,7 +16,7 @@ const BUILDING_TYPES: { value: BuildingType; label: string }[] = [
 ];
 
 export default function CustomerInfoStep() {
-  const { quoteData, actions, validateStep } = useQuoteStore();
+  const { quoteData, updateCustomer } = useQuoteStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
 
@@ -36,7 +36,7 @@ export default function CustomerInfoStep() {
   };
 
   const handleChange = (field: keyof typeof quoteData.customer, value: string) => {
-    actions.updateCustomer({ [field]: value });
+    updateCustomer({ [field]: value });
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
   };
 

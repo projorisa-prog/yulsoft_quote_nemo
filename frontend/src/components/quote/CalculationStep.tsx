@@ -4,28 +4,28 @@ import { useQuoteStore } from '@/store/quoteStore';
 import { formatNumber } from '@/lib/utils';
 
 export default function CalculationStep() {
-  const { quoteData, actions } = useQuoteStore();
+  const { quoteData, getCalculatedTotals, updateCalculation } = useQuoteStore();
 
-  const { subtotal, discount_amount, taxable_amount, vat_amount, grand_total } = actions.getCalculatedTotals();
+  const { subtotal, discount_amount, taxable_amount, vat_amount, grand_total } = getCalculatedTotals();
 
   const discountType = quoteData.calculation.discount_type;
   const discountValue = quoteData.calculation.discount_value;
 
   const handleDiscountTypeChange = (type: 'NONE' | 'PERCENT' | 'AMOUNT') => {
-    actions.updateCalculation({ discount_type: type });
+    updateCalculation({ discount_type: type });
   };
 
   const handleDiscountValueChange = (value: string) => {
     const num = parseInt(value) || 0;
-    actions.updateCalculation({ discount_value: num });
+    updateCalculation({ discount_value: num });
   };
 
   const handleVatIncludedChange = (checked: boolean) => {
-    actions.updateCalculation({ vat_included: checked });
+    updateCalculation({ vat_included: checked });
   };
 
   const handleVatRateChange = (rate: number) => {
-    actions.updateCalculation({ vat_rate: rate });
+    updateCalculation({ vat_rate: rate });
   };
 
   return (

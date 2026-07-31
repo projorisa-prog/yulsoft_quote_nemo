@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useQuoteStore } from '@/store/quoteStore';
-import { QuoteItemRequest, DAYS_OF_WEEK } from '@/types/quote';
+import { QuoteItemRequest, DaysOfWeek } from '@/types/quote';
 
-const DAYS: DAYS_OF_WEEK[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-const DAY_LABELS: Record<DAYS_OF_WEEK, string> = {
+const DAYS: DaysOfWeek[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const DAY_LABELS: Record<DaysOfWeek, string> = {
   MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금', SAT: '토', SUN: '일',
 };
 
@@ -18,7 +18,7 @@ const PRESETS = [
 ];
 
 export default function ItemsStep() {
-  const { quoteData, actions } = useQuoteStore();
+  const { quoteData, addItem, updateItem, removeItem, setItems } = useQuoteStore();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showPresets, setShowPresets] = useState(false);
 
@@ -32,24 +32,24 @@ export default function ItemsStep() {
       exclude_area: '',
       memo: '',
     };
-    actions.addItem(newItem);
+    addItem(newItem);
     setEditingIndex(quoteData.items.length);
   };
 
-  const handleUpdateItem = (index: number, field: keyof QuoteItemRequest, value: string | number | string[]) => {
+  const handleUpdateItem = (index: number, field: keyof QuoteItemRequest, value: string | number | DaysOfWeek[]) => {
     const updated = { ...quoteData.items[index], [field]: value };
-    actions.updateItem(index, updated);
+    updateItem(index, updated);
   };
 
   const handleDeleteItem = (index: number) => {
     if (window.confirm('이 항목을 삭제하시겠습니까?')) {
-      actions.removeItem(index);
+      removeItem(index);
       if (editingIndex === index) setEditingIndex(null);
       else if (editingIndex !== null && editingIndex > index) setEditingIndex(editingIndex - 1);
     }
   };
 
-  const handlePresetClick = (presetDays: DAYS_OF_WEEK[]) => {
+  const handlePresetClick = (presetDays: DaysOfWeek[]) => {
     if (editingIndex !== null) {
       handleUpdateItem(editingIndex, 'days', presetDays);
     }
@@ -59,7 +59,7 @@ export default function ItemsStep() {
     const newItems = [...quoteData.items];
     const [moved] = newItems.splice(fromIndex, 1);
     newItems.splice(toIndex, 0, moved);
-    actions.setItems(newItems.map((item, i) => ({ ...item, sort_order: i + 1 })));
+    setItems(newItems.map((item, i) => ({ ...item, sort_order: i + 1 })));
   };
 
   return (

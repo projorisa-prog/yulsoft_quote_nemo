@@ -26,17 +26,17 @@ const DESIGNS: { key: DesignKey; label: string; description: string; preview: st
 ];
 
 export default function DesignStep({ onSubmit }: { onSubmit: (e: React.FormEvent) => void }) {
-  const { quoteData, actions } = useQuoteStore();
+  const { quoteData, setDesignKey, updateDesign, isSubmitting } = useQuoteStore();
   const [expiresDays, setExpiresDays] = useState(quoteData.expires_days);
 
   const handleExpiresChange = (value: string) => {
     const num = parseInt(value) || 30;
     setExpiresDays(Math.min(Math.max(num, 1), 365));
-    actions.updateDesign({ expires_days: Math.min(Math.max(num, 1), 365) });
+    updateDesign({ expires_days: Math.min(Math.max(num, 1), 365) });
   };
 
   const handleDesignSelect = (key: DesignKey) => {
-    actions.setDesignKey(key);
+    setDesignKey(key);
   };
 
   return (
@@ -110,9 +110,9 @@ export default function DesignStep({ onSubmit }: { onSubmit: (e: React.FormEvent
           type="submit"
           form={onSubmit.toString()}
           className="btn-accent w-full py-4 text-lg font-semibold"
-          disabled={actions.isSubmitting}
+          disabled={isSubmitting}
         >
-          {actions.isSubmitting ? '견적서 생성 중...' : '견적서 생성 및 PDF 다운로드'}
+          {isSubmitting ? '견적서 생성 중...' : '견적서 생성 및 PDF 다운로드'}
         </button>
         <p className="text-center text-sm text-gray-500 mt-3">
           생성이 완료되면 자동으로 완료 페이지로 이동하며 PDF가 다운로드됩니다.

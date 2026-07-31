@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { formatNumber, formatDateShort, UserPlan } from '@/lib/utils';
+import { formatNumber, formatDateShort } from '@/lib/utils';
+import { UserPlan } from '@/types/quote';
 import { useQuoteStore } from '@/store/quoteStore';
 
 interface Template {
@@ -20,7 +21,8 @@ interface Template {
 
 export default function MyTemplatesPage() {
   const router = useRouter();
-  const { accessToken, user, quoteData, actions } = useQuoteStore();
+  const { accessToken, user } = useQuoteStore();
+  const { setItems, updateCalculation, setCurrentStep, setTemplateId } = useQuoteStore.getState();
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -36,55 +38,51 @@ export default function MyTemplatesPage() {
   }, [accessToken, page]);
 
   const fetchTemplates = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/backend/my/templates?page=${page}&limit=10`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/backend/my/templates?page=${page}&limit=10`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        setTemplates(data.items);
-        setTotal(data.total);
-        setTotalPages(data.total_pages);
+        if (res.ok) {
+          const data = await res.json();
+          setTemplates(data.items);
+          setTotal(data.total);
+          setTotalPages(data.total_pages);
+        }
+      } catch (err) {
+        console.error('Failed to fetch templates:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch templates:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const handleDelete = async (templateId: string) => {
-    if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
+    const handleDelete = async (templateId: string) => {
+      if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
     
-    try {
-      const res = await fetch(`/api/backend/my/templates/${templateId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      try {
+        const res = await fetch(`/api/backend/my/templates/${templateId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
 
-      if (res.ok) {
-        setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+        if (res.ok) {
+          setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+        }
+      } catch (err) {
+        alert('삭제에 실패했습니다.');
       }
-    } catch (err) {
-      alert('삭제에 실패했습니다.');
-    }
-  };
+    };
 
-  const handleUseTemplate = (template: any) => {
-    const { setItems, updateCalculation, setCurrentStep, setTemplateId } = useQuoteStore.getState().actions;
+    const handleUseTemplate = (template: any) => {
+      if (template.calculation_snapshot) {
+        updateCalculation(template.calculation_snapshot);
+      }
+      setCurrentStep(2); // Go to items step
+      setTemplateId(template.id);
     
-    setItems(template.items);
-    if (template.calculation_snapshot) {
-      const store = useQuoteStore.getState();
-      store.actions.updateCalculation(template.calculation_snapshot);
-    }
-    useQuoteStore.getState().actions.setCurrentStep(2);
-    useQuoteStore.getState().actions.setTemplateId(template.id);
-    
-    router.push('/quote/create');
-  };
+      router.push('/quote/create');
+    };
 
   if (loading) {
     return (
