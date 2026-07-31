@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -16,9 +16,11 @@ from app.models.user import User, UserPlan
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+    from fastapi import Depends
+    from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-security = HTTPBearer()
+security: "HTTPBearer" = HTTPBearer()
 router = APIRouter()
 
 
@@ -91,8 +93,8 @@ def decode_token(token: str) -> dict:
 
 
 async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated["AsyncSession", Depends(get_db)],
+    credentials: Annotated["HTTPAuthorizationCredentials", "Depends(security)"],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ) -> User:
     payload = decode_token(credentials.credentials)
     user_id = payload.get("sub")
@@ -113,7 +115,7 @@ async def get_current_user(
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(request: RegisterRequest, db: Annotated["AsyncSession", Depends(get_db)]):
+async def register(request: RegisterRequest, db: Annotated["AsyncSession", "Depends(get_db)"]):
     # Check if email already exists
     result = await db.execute(select(User).where(User.email == request.email))
     if result.scalar_one_or_none():
@@ -161,7 +163,7 @@ async def register(request: RegisterRequest, db: Annotated["AsyncSession", Depen
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(request: LoginRequest, db: Annotated["AsyncSession", Depends(get_db)]):
+async def login(request: LoginRequest, db: Annotated["AsyncSession", "Depends(get_db)"]):
     result = await db.execute(select(User).where(User.email == request.email))
     user = result.scalar_one_or_none()
 
@@ -194,8 +196,8 @@ async def login(request: LoginRequest, db: Annotated["AsyncSession", Depends(get
 
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated["AsyncSession", Depends(get_db)],
+    credentials: Annotated["HTTPAuthorizationCredentials", "Depends(security)"],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ):
     payload = decode_token(credentials.credentials)
 
@@ -236,7 +238,7 @@ async def refresh_token(
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
+async def get_me(current_user: Annotated[User, "Depends(get_current_user)"]):
     return UserResponse(
         id=str(current_user.id),
         email=current_user.email,

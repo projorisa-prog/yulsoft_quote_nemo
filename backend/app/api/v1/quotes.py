@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -29,6 +29,7 @@ from app.services.pdf import pdf_service
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+    from fastapi import Depends
 
 router = APIRouter()
 
@@ -75,9 +76,9 @@ async def preview_quote(request: PreviewRequest):
 )
 async def create_quote(
     request: QuoteCreateRequest,
-    db: Annotated["AsyncSession", Depends(get_db)],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
     http_request: Request,
-    current_user: Annotated[User | None, Depends(get_current_user)] = None,
+    current_user: Annotated[User | None, "Depends(get_current_user)"] = None,
 ):
     totals = calculation_service.calculate_totals(request.calculation)
 
@@ -172,7 +173,7 @@ async def create_quote(
 )
 async def get_quote(
     public_id: uuid.UUID,
-    db: Annotated["AsyncSession", Depends(get_db)],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
     format: Annotated[str, Query(pattern="^(json|html)$")] = "json",
 ):
     result = await db.execute(select(Quote).where(Quote.id == public_id))
@@ -259,7 +260,7 @@ async def get_quote(
 )
 async def download_pdf(
     public_id: uuid.UUID,
-    db: Annotated["AsyncSession", Depends(get_db)],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ):
     result = await db.execute(select(Quote).where(Quote.id == public_id))
     quote = result.scalar_one_or_none()

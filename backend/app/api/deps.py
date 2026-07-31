@@ -4,7 +4,7 @@ import time
 from typing import TYPE_CHECKING, Annotated, AsyncGenerator
 from functools import lru_cache
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, JWTError
 from sqlalchemy import select
@@ -16,16 +16,18 @@ from app.models.user import User
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+    from fastapi import Depends
+    from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-security = HTTPBearer()
+security: "HTTPBearer" = HTTPBearer()
 
 # In-memory rate limiting storage (use Redis in production)
 _rate_limit_store: dict[str, list[float]] = {}
 
 
 async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated["AsyncSession", Depends(get_db_session)],
+    credentials: Annotated["HTTPAuthorizationCredentials", "Depends(security)"],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ) -> User:
     token = credentials.credentials
     try:
@@ -84,6 +86,7 @@ def get_rate_limit(max_requests: int, window_seconds: int = 60):
 
         _rate_limit_store[key].append(now)
 
+    from fastapi import Depends
     return Depends(rate_limit_check)
 
 

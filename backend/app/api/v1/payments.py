@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import select
 
@@ -13,6 +13,7 @@ from app.models.user import User, UserPlan
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+    from fastapi import Depends
 
 router = APIRouter()
 
@@ -119,7 +120,7 @@ async def get_plans():
 
 @router.get("/subscription-status", response_model=SubscriptionStatusResponse)
 async def get_subscription_status(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, "Depends(get_current_user)"],
 ):
     plan = current_user.plan
     is_active = current_user.plan != UserPlan.FREE or True  # FREE is always active
@@ -140,8 +141,8 @@ async def get_subscription_status(
 @router.post("/subscribe", response_model=SubscribeResponse)
 async def subscribe(
     request: SubscribeRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated["AsyncSession", Depends(get_db)],
+    current_user: Annotated[User, "Depends(get_current_user)"],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ):
     # Validate plan
     if request.plan not in ["PRO", "ENTERPRISE"]:
@@ -190,7 +191,7 @@ async def subscribe(
 @router.post("/webhook/toss")
 async def toss_webhook(
     request: dict,
-    db: Annotated["AsyncSession", Depends(get_db)],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ):
     """Handle TossPayments webhook"""
     # Verify webhook signature (TODO: implement)
@@ -239,8 +240,8 @@ async def toss_webhook(
 @router.post("/payments/{payment_id}/confirm")
 async def confirm_payment(
     payment_id: str,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated["AsyncSession", Depends(get_db)],
+    current_user: Annotated[User, "Depends(get_current_user)"],
+    db: Annotated["AsyncSession", "Depends(get_db)"],
 ):
     """Confirm payment after redirect from TossPayments"""
     result = await db.execute(
