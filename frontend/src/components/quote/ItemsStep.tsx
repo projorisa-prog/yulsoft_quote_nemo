@@ -18,7 +18,7 @@ const PRESETS: { key: string; label: string; days: DaysOfWeek[] }[] = [
 ];
 
 export default function ItemsStep() {
-  const { quoteData, addItem, updateItem, removeItem, setItems } = useQuoteStore();
+  const { quoteData, addItem, updateItem, removeItem, setItems, nextStep, prevStep } = useQuoteStore();
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showPresets, setShowPresets] = useState(false);
 
@@ -27,8 +27,7 @@ export default function ItemsStep() {
       area: '',
       task: '',
       days: ['MON', 'WED', 'FRI'],
-      qty: 1,
-      unit_price: 0,
+      price: 0,
       exclude_area: '',
       memo: '',
     };
@@ -62,12 +61,30 @@ export default function ItemsStep() {
     setItems(newItems.map((item, i) => ({ ...item, sort_order: i + 1 })));
   };
 
+  const validateItems = () => {
+    for (const item of quoteData.items) {
+      if (!item.area.trim()) return { valid: false, message: '청소 구역을 입력해주세요.' };
+      if (!item.task.trim()) return { valid: false, message: '청소 내용을 입력해주세요.' };
+      if (!item.price || item.price <= 0) return { valid: false, message: '금액을 입력해주세요.' };
+    }
+    return { valid: true, message: '' };
+  };
+
+  const handleNext = () => {
+    const validation = validateItems();
+    if (!validation.valid) {
+      alert(validation.message);
+      return;
+    }
+    nextStep();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-1">2단계: 항목 구성</h2>
-          <p className="text-gray-600">청소 구역별 작업 내용과 단가를 입력하세요.</p>
+          <p className="text-gray-600">청소 구역, 내용, 금액을 입력하세요. (구역/내용/금액 필수)</p>
         </div>
         <button type="button" onClick={handleAddItem} className="btn-primary">
           + 항목 추가
@@ -115,7 +132,7 @@ export default function ItemsStep() {
                             className="input"
                             value={item.area}
                             onChange={(e) => handleUpdateItem(index, 'area', e.target.value)}
-                            placeholder="예: 거실, 화장실, 복도"
+                            placeholder="예: 3층 병원내, 거실, 복도"
                           />
                         </div>
                         <div>
@@ -125,13 +142,13 @@ export default function ItemsStep() {
                             className="input"
                             value={item.task}
                             onChange={(e) => handleUpdateItem(index, 'task', e.target.value)}
-                            placeholder="예: 바닥 청소, 변기 세척"
+                            placeholder="예: 전체바닥 건/습식청소, 분리수거"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="label">작업 요일 <span className="text-red-500">*</span></label>
+                        <label className="label">작업 요일</label>
                         <div className="flex flex-wrap gap-2 mb-2">
                           {DAYS.map((day) => (
                             <button
@@ -167,52 +184,19 @@ export default function ItemsStep() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="label">수량/횟수 <span className="text-red-500">*</span></label>
-                          <input
-                            type="number"
-                            className="input"
-                            value={item.qty}
-                            onChange={(e) => handleUpdateItem(index, 'qty', parseInt(e.target.value) || 1)}
-                            min="1"
-                          />
-                        </div>
-                        <div>
-                          <label className="label">단가 (원) <span className="text-red-500">*</span></label>
-                          <input
-                            type="number"
-                            className="input"
-                            value={item.unit_price}
-                            onChange={(e) => handleUpdateItem(index, 'unit_price', parseInt(e.target.value) || 0)}
-                            min="0"
-                            placeholder="0"
-                          />
-                        </div>
-                        <div>
-                          <label className="label">금액 (원)</label>
-                          <input
-                            type="text"
-                            className="input bg-gray-50"
-                            value={(item.qty * item.unit_price).toLocaleString()}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="label">제외 구역</label>
+                          <label className="label">비고</label>
                           <input
                             type="text"
                             className="input"
                             value={item.exclude_area}
                             onChange={(e) => handleUpdateItem(index, 'exclude_area', e.target.value)}
-                            placeholder="예: 발코니 제외"
+                            placeholder="예: 화장실 제외"
                           />
                         </div>
                         <div>
-                          <label className="label">비고</label>
+                          <label className="label">메모</label>
                           <input
                             type="text"
                             className="input"
@@ -221,6 +205,18 @@ export default function ItemsStep() {
                             placeholder="특이사항 메모"
                           />
                         </div>
+                      </div>
+
+                      <div>
+                        <label className="label">금액 (원) <span className="text-red-500">*</span></label>
+                        <input
+                          type="number"
+                          className="input"
+                          value={item.price}
+                          onChange={(e) => handleUpdateItem(index, 'price', parseInt(e.target.value) || 0)}
+                          min="0"
+                          placeholder="예: 500000"
+                        />
                       </div>
 
                       <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
@@ -252,12 +248,12 @@ export default function ItemsStep() {
                       </div>
                       <div>
                         <p className="text-gray-500">요일</p>
-                        <p className="font-medium">{item.days.map((d) => DAY_LABELS[d]).join(', ')}</p>
+                        <p className="font-medium">{item.days.map((d) => DAY_LABELS[d]).join(', ') || '-'}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-gray-500">금액</p>
                         <p className="font-semibold text-primary-900">
-                          {(item.qty * item.unit_price).toLocaleString()} 원
+                          {item.price.toLocaleString()} 원
                         </p>
                       </div>
                     </div>
@@ -291,6 +287,25 @@ export default function ItemsStep() {
           ))}
         </div>
       )}
+
+      {/* 하단 네비게이션 버튼 */}
+      <div className="flex justify-between pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={prevStep}
+          className="btn-secondary"
+        >
+          이전
+        </button>
+        <button
+          type="button"
+          onClick={handleNext}
+          className="btn-primary"
+          disabled={quoteData.items.length === 0}
+        >
+          다음
+        </button>
+      </div>
     </div>
   );
 }

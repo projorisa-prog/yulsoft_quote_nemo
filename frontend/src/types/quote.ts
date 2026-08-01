@@ -33,8 +33,7 @@ export interface QuoteItemRequest {
   area: string;
   task: string;
   days: DaysOfWeek[];
-  qty: number;
-  unit_price: number;
+  price: number;
   exclude_area: string;
   memo: string;
 }
@@ -60,9 +59,7 @@ export interface QuoteItemResponse {
   area: string;
   task: string;
   days: DaysOfWeek[];
-  qty: number;
-  unit_price: number;
-  total_price: number;
+  price: number;
   exclude_area: string;
   memo: string;
 }

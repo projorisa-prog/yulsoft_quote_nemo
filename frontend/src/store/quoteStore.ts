@@ -242,7 +242,7 @@ export const useQuoteStore = create<AuthState>()(
       getCalculatedTotals: () => {
         const { items, discount_type, discount_value, vat_included, vat_rate } = get().quoteData.calculation;
         
-        const subtotal = items.reduce((sum, item) => sum + item.qty * item.unit_price, 0);
+        const subtotal = items.reduce((sum, item) => sum + item.price, 0);
         
         let discount_amount = 0;
         if (discount_type === 'PERCENT') {

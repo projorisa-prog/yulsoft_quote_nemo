@@ -27,9 +27,7 @@ export default function QuotePDFView({ quote }: QuotePDFViewProps) {
         <td className="text-center">
           {item.days.map((d) => getDayLabel(d)).join(', ')}
         </td>
-        <td className="text-center">{item.qty}</td>
-        <td className="text-right">{formatNumber(item.unit_price)}</td>
-        <td className="text-right">{formatNumber(item.total_price)}</td>
+        <td className="text-right">{formatNumber(item.price)}</td>
       </tr>
     ));
   };
@@ -232,9 +230,7 @@ function renderItemsTable(quote: QuoteViewResponse) {
       <td>${item.area}</td>
       <td>${item.task}${item.exclude_area ? `<br><small class="exclude">(제외: ${item.exclude_area})</small>` : ''}${item.memo ? `<br><small class="memo">${item.memo}</small>` : ''}</td>
       <td class="text-center">${item.days.map((d) => getDayLabel(d)).join(', ')}</td>
-      <td class="text-center">${item.qty}</td>
-      <td class="text-right">${formatNumber(item.unit_price)}</td>
-      <td class="text-right">${formatNumber(item.total_price)}</td>
+      <td class="text-right">${formatNumber(item.price)}</td>
     </tr>
   `).join('');
 
@@ -246,8 +242,6 @@ function renderItemsTable(quote: QuoteViewResponse) {
           <th style="width: 100px;">구역</th>
           <th>청소내용</th>
           <th style="width: 120px;">요일</th>
-          <th class="text-center" style="width: 60px;">수량</th>
-          <th class="text-right" style="width: 100px;">단가</th>
           <th class="text-right" style="width: 100px;">금액</th>
         </tr>
       </thead>
