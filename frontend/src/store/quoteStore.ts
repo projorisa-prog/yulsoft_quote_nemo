@@ -78,7 +78,7 @@ const initialCustomer: CustomerInfo = {
   address: '',
   zipcode: '',
   detail_address: '',
-  building_type: 'APT',
+  building_type: 'OFFICE',
   area_pyeong: '',
 };
 

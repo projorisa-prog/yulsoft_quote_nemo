@@ -1,4 +1,4 @@
-export type BuildingType = 'APT' | 'OFFICETEL' | 'OFFICE' | 'STORE' | 'FACTORY' | 'ETC';
+export type BuildingType = 'OFFICE' | 'HOSPITAL' | 'ACADEMY' | 'KINDERGARTEN' | 'STORE' | 'FACTORY' | 'ETC';
 export type DiscountType = 'NONE' | 'PERCENT' | 'AMOUNT';
 export type DesignKey = 'classic' | 'modern' | 'color';
 export type PresetFrequency = 'WEEKLY_1' | 'WEEKLY_2' | 'WEEKLY_3' | 'WEEKLY_5' | 'DAILY';

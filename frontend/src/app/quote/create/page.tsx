@@ -39,8 +39,9 @@ export default function CreateQuotePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!quoteData.customer.name || !quoteData.customer.phone || !quoteData.customer.address) {
-      alert('고객 정보를 모두 입력해주세요.');
+    // 상호만 필수
+    if (!quoteData.customer.name) {
+      alert('상호를 입력해주세요.');
       return;
     }
 
