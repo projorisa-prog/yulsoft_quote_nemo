@@ -80,8 +80,7 @@ class QuoteItemRequest(BaseModel):
     area: Annotated[str, StringConstraints(min_length=1, max_length=50)]
     task: Annotated[str, StringConstraints(min_length=1, max_length=100)]
     days: Annotated[list[DAYS_OF_WEEK], Field(min_length=1)]
-    qty: Annotated[int, Field(ge=1)]
-    unit_price: Annotated[int, Field(ge=0)]
+    price: Annotated[int, Field(ge=0)]
     exclude_area: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
     memo: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
 

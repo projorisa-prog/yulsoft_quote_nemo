@@ -325,18 +325,19 @@ body {
             exclude = f'<div class="exclude-area">제외: {item.exclude_area}</div>' if item.exclude_area else ""
             memo = f'<div class="memo">{item.memo}</div>' if item.memo else ""
 
+            # Use unit_price as price (since qty=1, unit_price=price, total_price=price)
+            price = item.unit_price
+
             rows.append(f"""
 <tr>
     <td class="text-center">{idx}</td>
     <td>{item.area}</td>
     <td>{item.task}</td>
     <td class="text-center">{days_str}</td>
-    <td class="text-center">{item.qty:,}</td>
-    <td class="text-right">{item.unit_price:,}</td>
-    <td class="text-right">{item.total_price:,}</td>
+    <td class="text-right">{price:,}</td>
 </tr>
 <tr>
-    <td colspan="7">{exclude}{memo}</td>
+    <td colspan="5">{exclude}{memo}</td>
 </tr>
 """)
 
@@ -348,8 +349,6 @@ body {
             <th style="width: 100px;">구역</th>
             <th>청소내용</th>
             <th style="width: 120px;">요일</th>
-            <th class="text-center" style="width: 60px;">수량</th>
-            <th class="text-right" style="width: 100px;">단가</th>
             <th class="text-right" style="width: 100px;">금액</th>
         </tr>
     </thead>
@@ -457,9 +456,9 @@ body {
                 self.area = item_req.area
                 self.task = item_req.task
                 self.days = item_req.days
-                self.qty = item_req.qty
-                self.unit_price = item_req.unit_price
-                self.total_price = item_req.qty * item_req.unit_price
+                self.qty = 1
+                self.unit_price = item_req.price
+                self.total_price = item_req.price
                 self.exclude_area = item_req.exclude_area
                 self.memo = item_req.memo
 

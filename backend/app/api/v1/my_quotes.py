@@ -170,9 +170,7 @@ async def get_my_quote(
             "area": item.area,
             "task": item.task,
             "days": item.days,
-            "qty": item.qty,
-            "unit_price": item.unit_price,
-            "total_price": item.total_price,
+            "price": item.unit_price,
             "exclude_area": item.exclude_area,
             "memo": item.memo,
         })

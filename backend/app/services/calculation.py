@@ -14,7 +14,7 @@ class CalculationService:
 
     @staticmethod
     def calculate_item_total(item: QuoteItemRequest) -> int:
-        return item.qty * item.unit_price
+        return item.price
 
     @classmethod
     def calculate_subtotal(cls, items: list[QuoteItemRequest]) -> int:
