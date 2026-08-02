@@ -321,7 +321,10 @@ export const useQuoteStore = create<AuthState>()(
                     try {
                       data = await response.json();
                     } catch {
-                      throw new Error('응답 데이터 파싱 실패');
+                      // JSON 파싱 실패 시 응답 텍스트 확인
+                      const text = await response.text();
+                      console.error('Response parsing failed. Status:', response.status, 'Body:', text.substring(0, 500));
+                      throw new Error('응답 데이터 파싱 실패: ' + (text.substring(0, 200) || '빈 응답'));
                     }
                     set({ lastQuoteId: data.id, isSubmitting: false });
         } catch (error) {
