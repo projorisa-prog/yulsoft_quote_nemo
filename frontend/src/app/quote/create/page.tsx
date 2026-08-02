@@ -93,7 +93,7 @@ export default function CreateQuotePage() {
           <Stepper steps={STEPS} currentStep={currentStep} />
 
           <div className="p-6 md:p-8">
-            <form onSubmit={handleSubmit}>
+            <form id="quote-form" onSubmit={handleSubmit}>
               {renderStep()}
             </form>
           </div>

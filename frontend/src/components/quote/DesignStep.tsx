@@ -108,7 +108,7 @@ export default function DesignStep({ onSubmit }: { onSubmit: (e: React.FormEvent
       <div className="pt-4 border-t border-gray-200">
         <button
           type="submit"
-          form={onSubmit.toString()}
+          form="quote-form"
           className="btn-accent w-full py-4 text-lg font-semibold"
           disabled={isSubmitting}
         >
