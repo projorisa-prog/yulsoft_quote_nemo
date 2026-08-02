@@ -300,18 +300,30 @@ export const useQuoteStore = create<AuthState>()(
           };
           
           const response = await fetch('/api/backend/quotes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          });
-          
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || '견적서 생성 실패');
-          }
-          
-          const data = await response.json();
-          set({ lastQuoteId: data.id, isSubmitting: false });
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(payload),
+                    });
+
+                    if (!response.ok) {
+                      let errorMessage = '견적서 생성 실패';
+                      try {
+                        const error = await response.json();
+                        errorMessage = error.error?.message || errorMessage;
+                      } catch {
+                        // JSON 파싱 실패 시 (빈 응답, HTML 에러 페이지 등)
+                        errorMessage = `서버 오류 (${response.status})`;
+                      }
+                      throw new Error(errorMessage);
+                    }
+
+                    let data;
+                    try {
+                      data = await response.json();
+                    } catch {
+                      throw new Error('응답 데이터 파싱 실패');
+                    }
+                    set({ lastQuoteId: data.id, isSubmitting: false });
         } catch (error) {
           set({ isSubmitting: false });
           throw error;

@@ -145,7 +145,7 @@ export default function ItemsStep() {
                         <div>
                           <label className="label">청소 내용 <span className="text-red-500">*</span></label>
                           <textarea
-                            className="input min-h-[80px] resize-y"
+                            className="input min-h-[160px] resize-y"
                             value={item.task}
                             onChange={(e) => handleTaskChange(index, e.target.value)}
                             onKeyDown={(e) => {
@@ -157,7 +157,7 @@ export default function ItemsStep() {
                               }
                             }}
                             placeholder="예: 전체바닥 건/습식청소&#10;분리수거&#10;탕비실(커피머신, 씽크조)"
-                            rows={3}
+                            rows={6}
                           />
                           <p className="text-xs text-gray-500 mt-1">쉼표(,) 또는 엔터로 줄바꿈 가능</p>
                         </div>
