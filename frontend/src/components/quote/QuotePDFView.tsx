@@ -228,7 +228,7 @@ function renderItemsTable(quote: QuoteViewResponse) {
     <tr>
       <td class="text-center">${index + 1}</td>
       <td>${item.area}</td>
-      <td>${item.task}${item.exclude_area ? `<br><small class="exclude">(제외: ${item.exclude_area})</small>` : ''}${item.memo ? `<br><small class="memo">${item.memo}</small>` : ''}</td>
+      <td>${item.task.replace(/\n/g, '<br>')}${item.exclude_area ? `<br><small class="exclude">(제외: ${item.exclude_area})</small>` : ''}${item.memo ? `<br><small class="memo">${item.memo}</small>` : ''}</td>
       <td class="text-center">${item.days.map((d) => getDayLabel(d)).join(', ')}</td>
       <td class="text-right">${formatNumber(item.price)}</td>
     </tr>

@@ -22,6 +22,13 @@ export default function ItemsStep() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showPresets, setShowPresets] = useState(false);
 
+  // 청소 내용 입력 처리: 쉼표(,) 또는 엔터 입력 시 줄바꿈
+  const handleTaskChange = (index: number, value: string) => {
+    // 쉼표를 줄바꿈으로 변환
+    const processedValue = value.replace(/,/g, '\n');
+    handleUpdateItem(index, 'task', processedValue);
+  };
+
   const handleAddItem = () => {
     const newItem: QuoteItemRequest = {
       area: '',
@@ -137,13 +144,22 @@ export default function ItemsStep() {
                         </div>
                         <div>
                           <label className="label">청소 내용 <span className="text-red-500">*</span></label>
-                          <input
-                            type="text"
-                            className="input"
+                          <textarea
+                            className="input min-h-[80px] resize-y"
                             value={item.task}
-                            onChange={(e) => handleUpdateItem(index, 'task', e.target.value)}
-                            placeholder="예: 전체바닥 건/습식청소, 분리수거"
+                            onChange={(e) => handleTaskChange(index, e.target.value)}
+                            onKeyDown={(e) => {
+                              // 엔터 키로 줄바꿈 허용 (기본 동작 유지)
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                const newValue = e.currentTarget.value + '\n';
+                                handleUpdateItem(index, 'task', newValue);
+                              }
+                            }}
+                            placeholder="예: 전체바닥 건/습식청소&#10;분리수거&#10;탕비실(커피머신, 씽크조)"
+                            rows={3}
                           />
+                          <p className="text-xs text-gray-500 mt-1">쉼표(,) 또는 엔터로 줄바꿈 가능</p>
                         </div>
                       </div>
 
@@ -244,7 +260,7 @@ export default function ItemsStep() {
                       </div>
                       <div>
                         <p className="text-gray-500">내용</p>
-                        <p className="font-medium">{item.task || '-'}</p>
+                        <p className="font-medium whitespace-pre-wrap">{item.task || '-'}</p>
                       </div>
                       <div>
                         <p className="text-gray-500">요일</p>

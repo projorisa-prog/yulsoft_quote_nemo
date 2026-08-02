@@ -4,7 +4,7 @@ import { useQuoteStore } from '@/store/quoteStore';
 import { formatNumber } from '@/lib/utils';
 
 export default function CalculationStep() {
-  const { quoteData, getCalculatedTotals, updateCalculation } = useQuoteStore();
+  const { quoteData, getCalculatedTotals, updateCalculation, nextStep, prevStep } = useQuoteStore();
 
   const { subtotal, discount_amount, taxable_amount, vat_amount, grand_total } = getCalculatedTotals();
 
@@ -157,6 +157,24 @@ export default function CalculationStep() {
           <strong>확인사항:</strong> 위 금액은 입력하신 항목 기준으로 자동 계산됩니다.
           최종 견적서 발행 전 반드시 금액을 확인해주세요.
         </p>
+      </div>
+
+      {/* 하단 네비게이션 버튼 */}
+      <div className="flex justify-between pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={prevStep}
+          className="btn-secondary"
+        >
+          이전
+        </button>
+        <button
+          type="button"
+          onClick={nextStep}
+          className="btn-primary"
+        >
+          다음
+        </button>
       </div>
     </div>
   );
