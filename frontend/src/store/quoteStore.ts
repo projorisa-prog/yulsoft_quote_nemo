@@ -299,7 +299,7 @@ export const useQuoteStore = create<AuthState>()(
             expires_days: state.quoteData.expires_days,
           };
           
-          const response = await fetch('/api/backend/quotes', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://yulsoft-quote-nemo-backend.onrender.com/api/v1'}/quotes`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(payload),
