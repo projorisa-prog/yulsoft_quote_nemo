@@ -45,11 +45,11 @@ class CustomerInfo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: Annotated[str, StringConstraints(min_length=1, max_length=50)]
-    phone: Annotated[str, StringConstraints(pattern=r"^01[0-9]-?\d{4}-?\d{4}$")]
+    phone: Annotated[str, StringConstraints(pattern=r"^01[0-9]-?\d{4}-?\d{4}$")] = ""
     email: Optional[Annotated[str, StringConstraints(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]] = None
-    address: Annotated[str, StringConstraints(min_length=1, max_length=200)]
+    address: Annotated[str, StringConstraints(max_length=200)] = ""
     detail_address: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
-    building_type: BuildingType
+    building_type: BuildingType = BuildingType.OFFICE
     area_pyeong: Optional[Annotated[float, Field(ge=0)]] = None
 
     @field_validator("phone")
@@ -64,14 +64,14 @@ class CustomerInfo(BaseModel):
 class SupplierInfo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    biz_reg_no: Annotated[str, StringConstraints(pattern=r"^\d{10}$")]
-    company_name: Annotated[str, StringConstraints(min_length=1, max_length=100)]
-    ceo_name: Annotated[str, StringConstraints(min_length=1, max_length=50)]
-    address: Annotated[str, StringConstraints(min_length=1, max_length=200)]
-    business_type: Annotated[str, StringConstraints(min_length=1, max_length=100)]
-    business_item: Annotated[str, StringConstraints(min_length=1, max_length=100)]
-    phone: Annotated[str, StringConstraints(pattern=r"^01[0-9]-?\d{4}-?\d{4}$|^02-?\d{3,4}-?\d{4}$|^0[3-9]{1,2}-?\d{3,4}-?\d{4}$")]
-    email: Annotated[str, StringConstraints(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+    biz_reg_no: Annotated[str, StringConstraints(pattern=r"^\d{10}$")] = ""
+    company_name: Annotated[str, StringConstraints(min_length=1, max_length=100)] = "율소프트"
+    ceo_name: Annotated[str, StringConstraints(min_length=1, max_length=50)] = "홍길동"
+    address: Annotated[str, StringConstraints(min_length=1, max_length=200)] = "서울특별시 강남구 테헤란로 123"
+    business_type: Annotated[str, StringConstraints(min_length=1, max_length=100)] = "서비스업"
+    business_item: Annotated[str, StringConstraints(min_length=1, max_length=100)] = "소프트웨어 개발 및 공급"
+    phone: Annotated[str, StringConstraints(pattern=r"^01[0-9]-?\d{4}-?\d{4}$|^02-?\d{3,4}-?\d{4}$|^0[3-9]{1,2}-?\d{3,4}-?\d{4}$")] = "02-1234-5678"
+    email: Annotated[str, StringConstraints(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")] = "contact@yulsoft.kr"
 
 
 class QuoteItemRequest(BaseModel):
