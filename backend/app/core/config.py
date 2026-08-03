@@ -72,7 +72,7 @@ class Settings(BaseSettings):
 
     # CORS - store as string, parse via property
     cors_origins_raw: str = Field(
-        default='["http://localhost:3000", "http://localhost:3001", "https://yulsoft.kr"]',
+        default='["http://localhost:3000", "http://localhost:3001", "https://yulsoft.kr", "https://yulsoft-quote-nemo-frontend.onrender.com"]',
         alias="CORS_ORIGINS",
     )
 
