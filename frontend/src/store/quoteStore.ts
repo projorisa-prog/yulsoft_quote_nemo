@@ -305,26 +305,26 @@ export const useQuoteStore = create<AuthState>()(
                       body: JSON.stringify(payload),
                     });
 
+                    // 응답 텍스트를 먼저 읽어서 재사용 가능하게 함
+                    const responseText = await response.text();
+
                     if (!response.ok) {
                       let errorMessage = '견적서 생성 실패';
                       try {
-                        const error = await response.json();
+                        const error = JSON.parse(responseText);
                         errorMessage = error.error?.message || errorMessage;
                       } catch {
-                        // JSON 파싱 실패 시 (빈 응답, HTML 에러 페이지 등)
-                        errorMessage = `서버 오류 (${response.status})`;
+                        errorMessage = `서버 오류 (${response.status}): ${responseText.substring(0, 200)}`;
                       }
                       throw new Error(errorMessage);
                     }
 
                     let data;
                     try {
-                      data = await response.json();
+                      data = JSON.parse(responseText);
                     } catch {
-                      // JSON 파싱 실패 시 응답 텍스트 확인
-                      const text = await response.text();
-                      console.error('Response parsing failed. Status:', response.status, 'Body:', text.substring(0, 500));
-                      throw new Error('응답 데이터 파싱 실패: ' + (text.substring(0, 200) || '빈 응답'));
+                      console.error('Response parsing failed. Status:', response.status, 'Body:', responseText.substring(0, 500));
+                      throw new Error('응답 데이터 파싱 실패: ' + (responseText.substring(0, 200) || '빈 응답'));
                     }
                     set({ lastQuoteId: data.id, isSubmitting: false });
         } catch (error) {
