@@ -300,6 +300,8 @@ export const useQuoteStore = create<AuthState>()(
           };
           
           const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || 'https://yulsoft-quote-nemo-backend.onrender.com/api/v1';
+          console.log('[DEBUG] API Base URL:', apiBase);
+          console.log('[DEBUG] NEXT_PUBLIC_API_URL env:', process.env.NEXT_PUBLIC_API_URL);
           const response = await fetch(`${apiBase}/quotes`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
