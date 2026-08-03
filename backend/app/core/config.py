@@ -82,7 +82,7 @@ class Settings(BaseSettings):
 
     # Rate Limiting
     rate_limit_preview: int = Field(default=30, alias="RATE_LIMIT_PREVIEW")
-    rate_limit_create: int = Field(default=10, alias="RATE_LIMIT_CREATE")
+    rate_limit_create: int = Field(default=100, alias="RATE_LIMIT_CREATE")
     rate_limit_view: int = Field(default=60, alias="RATE_LIMIT_VIEW")
     rate_limit_pdf: int = Field(default=20, alias="RATE_LIMIT_PDF")
 
