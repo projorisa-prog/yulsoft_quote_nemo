@@ -16,6 +16,7 @@ from app.db.session import async_session_maker
 from app.models.user import User
 
 security = HTTPBearer()
+security_optional = HTTPBearer(auto_error=False)
 
 # In-memory rate limiting storage (use Redis in production)
 _rate_limit_store: dict[str, list[float]] = {}
@@ -60,6 +61,31 @@ async def get_current_user(
     return user
 
 
+async def get_current_user_optional(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security_optional)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> User | None:
+    if not credentials:
+        return None
+    token = credentials.credentials
+    try:
+        payload = decode_token(token)
+        if payload.get("type") != "access":
+            return None
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+    except (JWTError, ValueError):
+        return None
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user or not user.is_active:
+        return None
+    return user
+
+
+
 def get_rate_limit(max_requests: int, window_seconds: int = 60):
     """Create a rate limit dependency."""
     async def rate_limit_check(request: Request):
@@ -87,8 +113,12 @@ def get_rate_limit(max_requests: int, window_seconds: int = 60):
 
 
 # Specific rate limiters for different endpoints
+def _get_rate_limit_create():
+    from app.core.config import settings
+    return get_rate_limit(settings.rate_limit_create, 60)
+
 rate_limit_preview = get_rate_limit(30, 60)      # 30 req/min for preview
-rate_limit_create = get_rate_limit(10, 60)       # 10 req/min for create
+rate_limit_create = _get_rate_limit_create()
 rate_limit_view = get_rate_limit(60, 60)         # 60 req/min for view
 rate_limit_pdf = get_rate_limit(20, 60)          # 20 req/min for PDF
 rate_limit_auth = get_rate_limit(5, 60)          # 5 req/min for auth endpoints
