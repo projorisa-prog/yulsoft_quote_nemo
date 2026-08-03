@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 from pydantic.types import StringConstraints
 
 
@@ -45,42 +45,99 @@ class CustomerInfo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: Annotated[str, StringConstraints(min_length=1, max_length=50)]
-    phone: Annotated[str, StringConstraints(pattern=r"^01[0-9]-?\d{4}-?\d{4}$")] = ""
-    email: Optional[Annotated[str, StringConstraints(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]] = None
+    phone: Optional[str] = ""
+    email: Optional[str] = None
     address: Annotated[str, StringConstraints(max_length=200)] = ""
     detail_address: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
     building_type: BuildingType = BuildingType.OFFICE
-    area_pyeong: Optional[Annotated[float, Field(ge=0)]] = None
+    area_pyeong: Optional[float] = None
 
-    @field_validator("phone")
+    @field_validator("phone", mode="before")
     @classmethod
-    def format_phone(cls, v: str) -> str:
-        digits = re.sub(r"\D", "", v)
+    def validate_phone(cls, v: Any) -> str:
+        if not v:
+            return ""
+        v_str = str(v).strip()
+        digits = re.sub(r"\D", "", v_str)
         if len(digits) == 11:
             return f"{digits[:3]}-{digits[3:7]}-{digits[7:]}"
-        return v
+        return v_str
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def validate_email(cls, v: Any) -> Optional[str]:
+        if not v or str(v).strip() == "":
+            return None
+        v_str = str(v).strip()
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v_str):
+            raise ValueError("올바른 이메일 형식이 아닙니다.")
+        return v_str
+
+    @field_validator("building_type", mode="before")
+    @classmethod
+    def validate_building_type(cls, v: Any) -> BuildingType:
+        if not v or str(v).strip() == "":
+            return BuildingType.OFFICE
+        if isinstance(v, BuildingType):
+            return v
+        try:
+            return BuildingType(str(v).upper())
+        except ValueError:
+            return BuildingType.OFFICE
+
+    @field_validator("area_pyeong", mode="before")
+    @classmethod
+    def validate_area_pyeong(cls, v: Any) -> Optional[float]:
+        if v is None or str(v).strip() == "":
+            return None
+        try:
+            val = float(v)
+            return val if val >= 0 else None
+        except (ValueError, TypeError):
+            return None
 
 
 class SupplierInfo(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    biz_reg_no: Annotated[str, StringConstraints(pattern=r"^\d{10}$")] = ""
+    biz_reg_no: Optional[str] = ""
     company_name: Annotated[str, StringConstraints(min_length=1, max_length=100)] = "율소프트"
     ceo_name: Annotated[str, StringConstraints(min_length=1, max_length=50)] = "홍길동"
     address: Annotated[str, StringConstraints(min_length=1, max_length=200)] = "서울특별시 강남구 테헤란로 123"
     business_type: Annotated[str, StringConstraints(min_length=1, max_length=100)] = "서비스업"
     business_item: Annotated[str, StringConstraints(min_length=1, max_length=100)] = "소프트웨어 개발 및 공급"
-    phone: Annotated[str, StringConstraints(pattern=r"^01[0-9]-?\d{4}-?\d{4}$|^02-?\d{3,4}-?\d{4}$|^0[3-9]{1,2}-?\d{3,4}-?\d{4}$")] = "02-1234-5678"
-    email: Annotated[str, StringConstraints(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")] = "contact@yulsoft.kr"
+    phone: Optional[str] = "02-1234-5678"
+    email: Optional[str] = "contact@yulsoft.kr"
+
+    @field_validator("biz_reg_no", mode="before")
+    @classmethod
+    def validate_biz_reg_no(cls, v: Any) -> str:
+        if not v:
+            return ""
+        return re.sub(r"\D", "", str(v))
+
+    @field_validator("phone", mode="before")
+    @classmethod
+    def validate_supplier_phone(cls, v: Any) -> str:
+        if not v:
+            return ""
+        return str(v).strip()
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def validate_supplier_email(cls, v: Any) -> str:
+        if not v or str(v).strip() == "":
+            return "contact@yulsoft.kr"
+        return str(v).strip()
 
 
 class QuoteItemRequest(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, populate_by_name=True)
 
     area: Annotated[str, StringConstraints(min_length=1, max_length=50)]
     task: Annotated[str, StringConstraints(min_length=1, max_length=100)]
     days: Annotated[list[DAYS_OF_WEEK], Field(min_length=1)]
-    price: Annotated[int, Field(ge=0)]
+    price: Annotated[int, Field(ge=0, validation_alias=AliasChoices("price", "unit_price"))]
     exclude_area: Optional[Annotated[str, StringConstraints(max_length=100)]] = None
     memo: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
 
