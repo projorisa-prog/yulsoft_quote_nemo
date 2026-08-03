@@ -302,11 +302,16 @@ export const useQuoteStore = create<AuthState>()(
           const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || 'https://yulsoft-quote-nemo.onrender.com/api/v1';
           console.log('[DEBUG] API Base URL:', apiBase);
           console.log('[DEBUG] NEXT_PUBLIC_API_URL env:', process.env.NEXT_PUBLIC_API_URL);
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+          if (state.accessToken) {
+            headers['Authorization'] = `Bearer ${state.accessToken}`;
+          }
+
           const response = await fetch(`${apiBase}/quotes`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(payload),
-                    });
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+          });
 
                     // 응답 텍스트를 먼저 읽어서 재사용 가능하게 함
                     const responseText = await response.text();

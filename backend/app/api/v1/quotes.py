@@ -11,7 +11,15 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db, rate_limit_preview, rate_limit_create, rate_limit_view, rate_limit_pdf
+from app.api.deps import (
+    get_current_user,
+    get_current_user_optional,
+    get_db,
+    rate_limit_preview,
+    rate_limit_create,
+    rate_limit_view,
+    rate_limit_pdf,
+)
 from app.models.quote import Quote, QuoteStatus
 from app.models.quote_item import QuoteItem
 from app.models.user import User, UserPlan
@@ -75,7 +83,7 @@ async def create_quote(
     request: QuoteCreateRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     http_request: Request,
-    current_user: Annotated[User | None, Depends(get_current_user)] = None,
+    current_user: Annotated[User | None, Depends(get_current_user_optional)] = None,
 ):
     totals = calculation_service.calculate_totals(request.calculation)
 
